@@ -6,6 +6,24 @@ let transitLocations = new L.FeatureGroup();
 let scooterLocations = new L.FeatureGroup();
 let incidentLocations = new L.FeatureGroup();
 var currentShapefile = null;
+
+
+// firebase stuff
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBhcg-rUdd_GQ-jDVu3UNL0GQOa4uEqOAc",
+    authDomain: "noise-3b89d.firebaseapp.com",
+    projectId: "noise-3b89d",
+    storageBucket: "noise-3b89d.appspot.com",
+    messagingSenderId: "548295321778",
+    appId: "1:548295321778:web:a39aae9f11383310bf41ab",
+    measurementId: "G-DWW4GG4D07"
+  };
+
+  const app = firebase.initializeApp(firebaseConfig);
+
+
+
 var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
     //zoomToBoundsOnClick: false,
@@ -1644,46 +1662,60 @@ function new_archived_incident_cluster_layer() {
         var mechanical_permits = [];
 
         let scale = 1.278
-        Papa.parse("https://raw.githubusercontent.com/kotashashank/uil/main/construct.csv", { 
-            download: true,
-            complete: function(results) {
-                // get MPs
-                let filtered_data = results.data.filter((x) => x[0] == "MP");
-                console.log(filtered_data);
-                mechanical_permits = filtered_data;
+        // https://data.austintexas.gov/resource/3syk-w9eu.json
 
-                for (var i = 0; i < filtered_data.length; i++) {
-                    var marker = L.marker([filtered_data[i][48], filtered_data[i][49]]).addTo(map);
-                    // Change the icon to a custom icon
-                    console.log("added");
-                    marker.setIcon(L.icon({
-                        iconUrl: "./assets/images/construction.png",
-                        iconSize: [20 * scale, 20],
-                        iconAnchor: [10, 10],
-                        popupAnchor: [25, -10]
-                    }));
-    
-                    poiMarkers.push(marker);
-                    
-                } 
-            }});
+        fetch('https://data.austintexas.gov/resource/3syk-w9eu.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); 
+                }).then(construction_json => {
+                    console.log(construction_json);
+
+                    console.log(construction_json.length);
+
+                    for (var i = 0; i < construction_json.length; i++) {
+                        permit = construction_json[i];
+                        
+                        // filter permits
+                        if(permit.permittype == "MP" && permit.status_current == "Active") {
+
+                            var marker = L.marker([permit.latitude, permit.longitude]).addTo(map);
+                            // Change the icon to a custom icon
+                      
+                            marker.setIcon(L.icon({
+                                iconUrl: "./assets/images/construction.png",
+                                iconSize: [20 * scale, 20],
+                                iconAnchor: [10, 10],
+                                popupAnchor: [-5, 0]
+                            }));
+                            marker.bindPopup(`<b style="color:#191970; font-size:16px">Construction</b> <br> 
+                            <b>Description:</b> ${permit.description} <br> ` );
+                            poiMarkers.push(marker);
+
+                        } 
+                    }
+                  
+                });
+        
 
             
-            console.log(mechanical_permits);
-            for (var i = 0; i < mechanical_permits.length; i++) {
-                var marker = L.marker([mechanical_permits[48], jsonResult[49]]).addTo(map);
-                // Change the icon to a custom icon
-                console.log("added")
-                marker.setIcon(L.icon({
-                    iconUrl: "./assets/imaegs/bus_icon.png",
-                    iconSize: [70, 70],
-                    iconAnchor: [10, 10],
-                    popupAnchor: [25, -10]
-                }));
+            // console.log(mechanical_permits);
+            // for (var i = 0; i < mechanical_permits.length; i++) {
+            //     var marker = L.marker([mechanical_permits[48], jsonResult[49]]).addTo(map);
+            //     // Change the icon to a custom icon
+            //     console.log("added")
+            //     marker.setIcon(L.icon({
+            //         iconUrl: "./assets/imaegs/bus_icon.png",
+            //         iconSize: [70, 70],
+            //         iconAnchor: [10, 10],
+            //         popupAnchor: [25, -10]
+            //     }));
 
-                poiMarkers.push(marker);
+            //     poiMarkers.push(marker);
                 
-            } 
+            // } 
         // var result;
         // fetch(filePath)
         //     .then(response => {
@@ -1962,14 +1994,87 @@ function new_archived_incident_cluster_layer() {
         }
     }
 
+    function fetchAndProcessGeoJSON() {
+        const geojsonFilename = 'your_geojson_file.geojson';
+
+        fetch(`${mongoDBUrl}/files/${geojsonFilename}`)
+            .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text();
+            })
+            .then(geojsonData => {
+            try {
+                // Parse the GeoJSON data into a JavaScript object
+                const geojsonObject = JSON.parse(geojsonData);
+
+                // Access the features array or other relevant data
+                const features = geojsonObject.features;
+
+                // Process the list of features
+                features.forEach(feature => {
+                console.log(feature.properties); // Access feature properties or modify as needed
+                });
+            } catch (error) {
+                console.error('Error parsing GeoJSON:', error);
+            }
+            })
+            .catch(error => {
+            console.error('Error:', error);
+            });
+        }
+
+        // Call the function to retrieve and process the GeoJSON file
+    const noisePoints2 = [];
 
     function buildNoiseHeatmap() {
-        var heat = L.heatLayer(
-            noisePoints
-        , {radius: 5, max: 100, maxZoom: 16, blur: 5});
-        heat.addTo(map);
 
-        current_incident_shapefile = heat;
+        const storage = app.storage();
+        const noiseRef = storage.ref('noise_points.json');
+
+
+
+        noiseRef.getDownloadURL().then((url) => {
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = 'blob';
+            xhr.onload = async (event) => {
+              const blob = xhr.response;
+              console.log("lol");
+
+
+              data = JSON.parse(await blob.text())
+            
+                
+
+              for(var i = 0; i < 10000000; i++) {
+                // Object { longitude: -97.7611763596, latitude: 30.2641204542, noise_level: -99 }
+                const json_object = data[String(i)];
+                if(json_object) {
+                    noisePoints2.push([json_object.latitude, json_object.longitude, Math.max(30, data[String(i)].noise_level)])
+                }
+            
+              }
+              var heat = L.heatLayer(
+                noisePoints2
+            , {radius: 5, max: 80, maxZoom: 15, blur: 1});
+            
+            heat.addTo(map);
+
+            };
+            xhr.open('GET', url);
+            xhr.send();
+        
+        })
+
+
+
+        // Create a function to retrieve and process the GeoJSON file
+       
+
+     
+
+        // current_incident_shapefile = heat;
     
     }
     let current_incident_shapefile = null
@@ -2248,6 +2353,180 @@ function new_archived_incident_cluster_layer() {
 
     new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
 
+    var currentLon = -1;
+    var currentLat = -1;
+    var predictedNoise = -1;
+    var selectedNoise = 40;
+
+    function openNoiseMore() {
+        console.log("hey")
+        var moreButton = document.getElementById("openSurveyButton");
+        
+        if(moreButton.textContent != "Close") {
+            document.getElementById("noiseSurvey").style.display = "block";
+            document.getElementById("openSurveyButton").style.display = "none";
+            document.getElementById("noiseDescrip").style.display = "none";
+        }
+        //airMarkerPopup += `<a href="#">More...</a>`
+    }
+
+    function slide(amount) {
+
+        var comparison = "a whisper"
+        selectedNoise = amount;
+        if(amount < 40) {
+            comparison = "a whisper (or quieter)"
+        } else if(amount < 50) {
+            comparison = "rain"
+        } else if(amount < 60) {
+            comparison = "an average indoor room"
+        } else if(amount < 70) {
+            comparison = "an average office room"
+        } else if(amount < 80) {
+            comparison = "landscaping equipment (from inside a home)"
+        } else if(amount < 85) {
+            comparison = "an electric vacuum"
+        } else if(amount < 90) {
+            comparison = "a noisy restaurant"
+        } else if(amount < 95) {
+            comparison = "a hairdryer"
+        } else if(amount < 100) {
+            comparison = "a professional sports game"
+        } else if(amount < 110) {
+            comparison = "a lawn mower"
+        } else if(amount < 120) {
+            comparison = "an ambulance"
+        }  else if(amount < 130) {
+            comparison = "a jackhammer"
+        } else {
+            comparison = "a gun firing (or louder)"
+        }
+
+    
+        document.getElementById("noiseScaleLabel").innerText = comparison + " (" + amount + " db)";
+    }
+
+    
+    function onSubmit() {
+        const db = app.database();
+    
+        // A post entry.
+        const postData = {
+            date: new Date(),
+            longitude: currentLon,
+            latitude: currentLat,
+            predictedNoiseLevel: predictedNoise,
+            userSubmittedNoiseLevel: parseInt(selectedNoise)
+        };
+    
+        // Get a key for a new Post.
+        db.ref("user_noise_submission/").push(postData).then(() => {
+            document.getElementById("noiseSurvey").style.display = "none";
+            document.getElementById("noiseDescrip").style.display = "block";
+            document.getElementById("noiseDescrip").style.fontSize = "16px";
+            document.getElementById("noiseDescrip").innerText = "Thank you for your input!"
+        });
+    }
+
+    map.on('click', function(e) {
+
+        const degreePerMeter = 1 / 111139;
+        const pointRadiusDetection = 30;
+
+        var bestPointDistance = 0xFFFFFFFF;
+        var bestPointNoiseLevel = -1;
+
+        for (var i = 0; i < noisePoints2.length; i++) {
+
+            const noisePoint = noisePoints2[i];
+            const latitude = noisePoint[0];
+            const longitude = noisePoint[1];
+            const noise_level = noisePoint[2];
+           
+            // calculate distance from noise point, if less than 20 meters (20 / 111139), use as noise level, if not consider noise level normal
+            const dist = ((Math.abs(e.latlng.lat - latitude) + Math.abs(e.latlng.lng - longitude)) / 2);
+            if(dist <= degreePerMeter * pointRadiusDetection) {
+                if(dist <= bestPointDistance) {
+                    bestPointDistance = dist;
+                    bestPointNoiseLevel = noise_level;
+                    currentLon = longitude;
+                    currentLat = latitude;
+                    predictedNoise = noise_level;
+                }
+        
+            }
+
+            
+        }
+
+        var extraInformation = "The noise levels around you are as loud as a whisper. These levels of noise are <i>safe!</i>"
+        if(bestPointNoiseLevel < 40) {
+            extraInformation = "The noise levels around you are as loud as a whisper. These levels of noise are <i>safe!</i>"
+        } else if(bestPointNoiseLevel < 60) {
+            extraInformation = "The noise levels around you are as loud as an average indoor room. These levels of noise are <i>safe!</i>"
+        } else if(bestPointNoiseLevel < 70) {
+            extraInformation = "The noise levels around you are as loud as an average office room. These levels of noise are <i>safe!</i>"
+        } else if(bestPointNoiseLevel < 80) {
+            extraInformation = "The noise levels around you are as loud as landscaping equipment (from inside a home). These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 85) {
+            extraInformation = "The noise levels around you are as loud as an electric vacuum. These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 85) {
+            extraInformation = "The noise levels around you are as loud as an electric vacuum. These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 90) {
+            extraInformation = "The noise levels around you are as loud as a noisy restaurant. These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 95) {
+            extraInformation = "The noise levels around you are as loud as a hairdryer. These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 100) {
+            extraInformation = "The noise levels around you are as loud as a pro sports game. These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 100) {
+            extraInformation = "The noise levels around you are as loud as a pro sports game. These levels of noise can be <i>dangerous</i> if you are exposed to them over time. "
+        } else if(bestPointNoiseLevel < 110) {
+            extraInformation = "The noise levels around you are as loud as a lawn mower. These levels of noise are dangerous and can cause pain. If you are exposed to these levels, please wear sound protection."
+        } else if(bestPointNoiseLevel < 120) {
+            extraInformation = "The noise levels around you are as loud as an ambulance. These levels of noise are dangerous and can cause pain. If you are exposed to these levels, please wear sound protection."
+        }  else if(bestPointNoiseLevel < 130) {
+            extraInformation = "The noise levels around you are as loud as a jackhammer. These levels of noise are dangerous and can cause pain. If you are exposed to these levels, please wear sound protection."
+        } else {
+            extraInformation = "The noise levels around you are as loud or louder than a gun firing. These levels of noise are dangerous and can cause pain. If you are exposed to these levels, please wear sound protection."
+        }
+        
+        const submitContent = 
+                            `<div style="display:none" id="noiseSurvey">
+    
+                                <span style="font-size:12px">What does the noise around you (outside) sound like? </span><br>
+                                As loud as <b id="noiseScaleLabel">rain (40 db)</b>
+                                <div class="slidecontainer">
+                                    <input type="range" min="25" max="130" value="40" class="slider" id="myRange" onChange="slide(this.value)">
+                                </div>
+                                <a id="" href="#" onclick="onSubmit()" ><b>Submit</b></a>
+
+                            </div>`
+
+        
+
+
+        const normalLevelContent = `<b style="font-size:20px">Noise</b> <br> 
+        <span style="font-size:16px"><b>Predicted Noise Level:</b> Normal.</span> <br>
+        The noise levels at this location are normal!`;
+
+        const noisePointFoundContent = `<b style="font-size:20px">Noise Level</b> <br> 
+        <span style="font-size:16px"><b>Predicted Noise Level:</b> <i>${bestPointNoiseLevel} </i> db </span> <span id="noiseDescrip"> <br> ${extraInformation} </span>
+        <br> <i><a id="openSurveyButton" href="#" onclick="openNoiseMore()" >Add Noise Information at this Location</a></i>` + submitContent
+        
+        const content = bestPointNoiseLevel == -1 ? normalLevelContent : noisePointFoundContent;
+        
+        
+        var popup = L.popup()
+            .setLatLng([e.latlng.lat, e.latlng.lng])
+            .setContent(content)
+            .openOn(map);
+
+
+            
+
+    });
+    
+
     let inactive_flag = false;
     let purple_air_diaplay_flag = false;
     let microsoft_air_display_flag = false;
@@ -2500,3 +2779,5 @@ L.control.watermark({ position: 'bottomright' }).addTo(map);
 
     //     window.AverageFire = result;
     // });
+
+    

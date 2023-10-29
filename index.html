@@ -2,15 +2,15 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Mobility Map - Austin Digital Twin</title> 
-		<meta name="description" content="Austin urban mobility map.">
+		<title>Urban Noise Map - Austin Digital Twin</title> 
+		<meta name="description" content="Austin urban noise map.">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<!-- Open Graph tags for social media -->
-		<meta property="og:title" content="Mobility Map - Austin Digital Twin">
+		<meta property="og:title" content="Urban Noise Map - Austin Digital Twin">
 		<meta property="og:description" content="Austin urban mobility map.">
 		<meta property="og:image" content="https://img.itch.zone/aW1hZ2UvMTQ4MDY3NS85Mzc5NTEwLnBuZw==/original/IRJDeW.png">
-		<meta property="og:url" content="mobility.austindigitaltwin.com">
+		<meta property="og:url" content="noise.austindigitaltwin.com">
 
 		<!-- Enables Twitter support -->
 		<meta name="twitter:card" content="summary">
@@ -24,6 +24,7 @@
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 			crossorigin=""></script>
+
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 		<script src="https://smartcity.tacc.utexas.edu/FireIncident/assets/js/leaflet-rotatedMarker.js"></script>
 		<script src="https://smartcity.tacc.utexas.edu/FireIncident/assets/js/leaflet.shpfile.js"></script>
@@ -34,6 +35,9 @@
 		<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
 		<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
 		<script src="https://unpkg.com/mapbox-gl-leaflet/leaflet-mapbox-gl.js"></script>
+
+
+
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
 		<script src="https://cdn.jsdelivr.net/gh/gipong/shp2geojson.js@master/lib/jszip.js"></script>
@@ -162,29 +166,7 @@ Check My Location button code leaflet
 		</div>
 		
 		  <!-- Modal -->
-		  <div class="modal fade" id="statsModal" role="dialog" style="overflow: hidden; margin-top: 10px;" >
-			<div class="modal-dialog" style="width: 80%; height: 120%;overflow: hidden; " >
-			
-			  <!-- Modal content-->
-			  <div class="modal-content" style="height: 80%; overflow: hidden;">
-				<div class="modal-header" style="overflow: hidden;" >
-				  <button type="button" class="close" data-dismiss="modal">&times;</button>
-				  <h4 class="modal-title">Active Fire Incidents Stats</h4>
-				</div>
-				<iframe frameBorder="0" src="https://smartcity.tacc.utexas.edu/FireIncident/FireIncidentStats.html" width="130%" height="130%" style="overflow: hidden;        -ms-zoom: 0.75; 
-				-moz-transform: scale(0.75);
-				-moz-transform-origin: 0 0;
-				-o-transform: scale(0.75);
-				-o-transform-origin: 0 0;
-				-webkit-transform: scale(0.75);
-				-webkit-transform-origin: 0 0;"></iframe>
-				<div class="modal-footer">
-				  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				</div>
-			  </div>
-			  
-			</div>
-		  </div>
+
 
 
 		<!-- Modal -->
@@ -461,42 +443,6 @@ Check My Location button code leaflet
 
 				</div>
 	
-				<div class="dropdown" >
-
-				<div id="filter-menu1" class="dropdown-check-list1" tabindex="100">
-					<span id="CurrentSelectedDate" class="anchor"  type="button" data-toggle="dropdown" style="user-select: none">⠀ ⠀᠎⠀ ⠀Today</span>
-
-					<ul class="dropdown-menu" style=" user-select: none">
-						<li><a onclick="getToday()" href="#" class="option">Today</a></li>
-						<li><a onclick="getYesterday()" href="#" class="option">Yesterday</a></li>
-						<li><a onclick="get3Days()" href="#" class="option">Past 3 Days</a></li>
-						<li><a onclick="getCustom()" href="#" class="option">Custom</a></li>
-					  </ul>
-					<!--
-					<ul class="items">
-
-					<div class="select-bar">
-					<div class="bar bar-grey" style="color: black; display: block;">
-						<div class="option1">Today</div>
-						<div class="option1">Yesterday</div>
-						<div class="option1">Past 3 Days</div>
-						<div class="option1">Custom</div>
-					</div>
-					<div class="bar-outer">
-						<div class="bar bar-purple" style="color: black; display: block;">
-							<div class="option1">Today</div>
-							<div class="option1">Yesterday</div>
-							<div class="option1">Past 3 Days</div>
-							<div class="option1">Custom</div>
-						</div>
-					</div>
-				</div>
-	
-
-					</ul>
-					-->
-				</div>
-				</div>
 
 				<!--
 				<div class="select-bar" width="10%" style="margin-left:100px; width: 300px;">
@@ -810,7 +756,14 @@ Check My Location button code leaflet
 		rel="stylesheet"
 		href="assets/css/fireMap.css"
 		/>
-		<script src="assets/js/papaparse.min.js""></script>
+t>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.5.0/firebase-app-compat.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.5.0/firebase-storage-compat.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.5.0/firebase-database-compat.min.js"></script>
+		<!-- <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js"></script> -->
+
+		<script src="assets/js/papaparse.min.js"></script>
 		<script src="assets/js/mobility_map.js"></script>
 
 
