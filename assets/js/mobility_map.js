@@ -2026,13 +2026,15 @@ function new_archived_incident_cluster_layer() {
         }
 
         // Call the function to retrieve and process the GeoJSON file
-    const noisePoints2 = [];
-
+    let noisePoints2 = [];
+    let current_noise_shapefile = null;
+    
     function buildNoiseHeatmap() {
 
         const storage = app.storage();
         const noiseRef = storage.ref('noise_points.json');
 
+        noisePoints2 = [];
 
 
         noiseRef.getDownloadURL().then((url) => {
@@ -2040,15 +2042,11 @@ function new_archived_incident_cluster_layer() {
             xhr.responseType = 'blob';
             xhr.onload = async (event) => {
               const blob = xhr.response;
-              console.log("lol");
-
-
               data = JSON.parse(await blob.text())
             
                 
 
               for(var i = 0; i < 10000000; i++) {
-                // Object { longitude: -97.7611763596, latitude: 30.2641204542, noise_level: -99 }
                 const json_object = data[String(i)];
                 if(json_object) {
                     noisePoints2.push([json_object.latitude, json_object.longitude, Math.max(30, data[String(i)].noise_level)])
@@ -2060,6 +2058,7 @@ function new_archived_incident_cluster_layer() {
             , {radius: 5, max: 80, maxZoom: 15, blur: 1});
             
             heat.addTo(map);
+            current_noise_shapefile = heat;
 
             };
             xhr.open('GET', url);
@@ -2067,27 +2066,22 @@ function new_archived_incident_cluster_layer() {
         
         })
 
-
-
-        // Create a function to retrieve and process the GeoJSON file
-       
-
-     
-
-        // current_incident_shapefile = heat;
     
     }
-    let current_incident_shapefile = null
-    function buildIncidentChoropleth() {
-        if (current_incident_shapefile != null){
-            map.removeLayer(current_incident_shapefile)
-            current_incident_shapefile = null
+    
+    function buildNoiseLayer() {
+        if (current_noise_shapefile != null){
+            map.removeLayer(current_noise_shapefile)
+            current_noise_shapefile = null
         }
         if (!document.querySelector(".choropleth_incident").checked) {
             return
         }
+
        
         buildNoiseHeatmap();
+        
+       
        
     }
 
@@ -2203,8 +2197,7 @@ function new_archived_incident_cluster_layer() {
         });
 
         document.querySelector(".choropleth_incident").addEventListener('click', function () {
-            console.log('choropleth_incident click')
-            buildIncidentChoropleth();
+            buildNoiseLayer();
         });
 
         document.querySelector(".traffic_condition").addEventListener('click', function () {
