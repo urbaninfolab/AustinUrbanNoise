@@ -5,6 +5,7 @@ var microsoftAirMonitors = new L.FeatureGroup();
 let transitLocations = new L.FeatureGroup();
 let scooterLocations = new L.FeatureGroup();
 let incidentLocations = new L.FeatureGroup();
+let waterPollution = new L.FeatureGroup();
 var currentShapefile = null;
 
 
@@ -1635,6 +1636,78 @@ function new_archived_incident_cluster_layer() {
     }
 
     var poiMarkers = [];
+    let current_waterpollution_map = null;
+
+    function buildWaterPollutionMap() {
+
+        if(current_waterpollution_map != null) {
+            map.removeLayer(current_waterpollution_map);
+            current_waterpollution_map = null;
+        }
+        if (!document.querySelector(".water").checked) {
+            return;
+        }
+
+
+
+        fetch('https://data.austintexas.gov/resource/5tye-7ray.json?$where=(date_extract_y(sample_date)%20%3E%202019)&$limit=100000&$select=lat_dd_wgs84,lon_dd_wgs84,sample_date,project,parameter,result,unit')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); 
+                }).then(water_json => {
+               
+                    scale = 1;
+                    for (var i = 0; i < water_json.length; i++) {
+
+                        water_data = water_json[i];
+
+                        const lat = parseFloat(water_data.lat_dd_wgs84);
+                        const lon = parseFloat(water_data.lon_dd_wgs84);
+
+                        if(isNaN(lat) || isNaN(lon)) {
+                            continue;
+                        }
+                        
+                        var marker = L.circleMarker([lat, lon], {
+                            color: 'dodgerblue',
+                            radius: 5
+                            
+                        });
+           
+                        // marker.setIcon(L.icon({
+                        //     iconUrl: "./assets/images/water_icon.png",
+                        //     iconSize: [10 * scale, 10],
+                        //     iconAnchor: [10, 10],
+                        //     popupAnchor: [-5, 0]
+                        // }));
+
+
+                        let date = new Date(water_data.sample_date);
+                      
+
+                        marker.bindPopup(`<b style="color:#191970; font-size:16px">Water Information</b> <br> 
+                        <b>Date:</b> ${date.getMonth()}/${date.getDay()}/${date.getFullYear()} <br> 
+                        <b>Project:</b> ${water_data.project} <br>
+                        <b>Parameter:</b> ${water_data.parameter} <br>
+                        <b>Result:</b> ${water_data.result} ${water_data.unit} <br>` );
+
+                        waterPollution.addLayer(marker)
+                        
+
+                    }
+
+                });
+
+                waterPollution.addTo(map);
+                current_waterpollution_map = waterPollution;
+
+                console.log("got all pollution")
+
+                
+            
+    }
 
     function buildPOIMap() {
 
@@ -1650,15 +1723,6 @@ function new_archived_incident_cluster_layer() {
         }
 
 
-        console.log("POI radio button clicked");
-        // display csv file from POI.csv
-        var filePath = './data/construct.csv';
-        // fetch('../static/test.txt', {mode: 'no-cors'}).then(response => {
-        //     return response.text();
-        // }).then(data => {
-
-        // })
-
         var mechanical_permits = [];
 
         let scale = 1.278
@@ -1671,9 +1735,6 @@ function new_archived_incident_cluster_layer() {
                     }
                     return response.json(); 
                 }).then(construction_json => {
-                    console.log(construction_json);
-
-                    console.log(construction_json.length);
 
                     for (var i = 0; i < construction_json.length; i++) {
                         permit = construction_json[i];
@@ -1690,6 +1751,7 @@ function new_archived_incident_cluster_layer() {
                                 iconAnchor: [10, 10],
                                 popupAnchor: [-5, 0]
                             }));
+
                             marker.bindPopup(`<b style="color:#191970; font-size:16px">Construction</b> <br> 
                             <b>Description:</b> ${permit.description} <br> ` );
                             poiMarkers.push(marker);
@@ -1699,100 +1761,6 @@ function new_archived_incident_cluster_layer() {
                   
                 });
         
-
-            
-            // console.log(mechanical_permits);
-            // for (var i = 0; i < mechanical_permits.length; i++) {
-            //     var marker = L.marker([mechanical_permits[48], jsonResult[49]]).addTo(map);
-            //     // Change the icon to a custom icon
-            //     console.log("added")
-            //     marker.setIcon(L.icon({
-            //         iconUrl: "./assets/imaegs/bus_icon.png",
-            //         iconSize: [70, 70],
-            //         iconAnchor: [10, 10],
-            //         popupAnchor: [25, -10]
-            //     }));
-
-            //     poiMarkers.push(marker);
-                
-            // } 
-        // var result;
-        // fetch(filePath)
-        //     .then(response => {
-        //     return response.text();
-            
-        // })
-        // .then(data => {
-        //     result = data;
-        //     console.log(result);
-        //     var lines = result.replace("\\", "").replace("\\\r","").split('\n');
-        //     var headers = lines[0].split(',');
-        //     var jsonResult = [];
-        //     for (var i = 1; i < lines.length; i++) {
-        //         var obj = {};
-        //         var currentline = lines[i].split(',');
-        //         var valid = true;
-        //         for (var j = 0; j < headers.length; j++) {
-        //             if (currentline[j] == undefined) 
-        //                 valid = false;
-        //             obj[headers[j]] = currentline[j];
-        //         }
-        //         if (valid) 
-        //         jsonResult.push(obj);
-        //     }
-        //     console.log(jsonResult);
-        //     for (var i = 0; i < jsonResult.length; i++) {
-        //         break;
-        //         console.log(jsonResult[i]);
-
-        //         var iconLink = "assets/images/firedept.png";
-        //         var type = "Fire";
-        //         if(jsonResult[i]["Jurisdiction Name"] == "APD") {
-        //             iconLink = "assets/images/policedept.png";
-        //             type = "Police";
-        //         }
-        //         else if(jsonResult[i]["Jurisdiction Name"] == "AHD") {
-        //             iconLink = "assets/images/hospital.png";
-        //             type = "Medical";
-        //         }
-
-        //         console.log("Type: " + type);
-
-        //         // Perform checkbox booleans
-        //         if(!fireDept && !policeDept && !hospital)
-        //             continue
-        //         else if(!fireDept && !policeDept && hospital && type != "Medical")
-        //             continue
-        //         else if(!fireDept && policeDept && !hospital && type != "Police")
-        //             continue
-        //         else if(!fireDept && policeDept && hospital && type != "Police" && type != "Medical")
-        //             continue
-        //         else if(fireDept && !policeDept && !hospital && type != "Fire")
-        //             continue
-        //         else if(fireDept && !policeDept && hospital && type != "Fire" && type != "Medical")
-        //             continue
-        //         else if(fireDept && policeDept && !hospital && type != "Fire" && type != "Police")
-        //             continue
-        //         else if(fireDept && policeDept && hospital && type != "Fire" && type != "Police" && type != "Medical")
-        //             continue
-                
-
-        //         var marker = L.marker([jsonResult[i].Y, jsonResult[i].X]).addTo(map);
-        //         // Change the icon to a custom icon
-        //         marker.setIcon(L.icon({
-        //             iconUrl: iconLink,
-        //             iconSize: [70, 70],
-        //             iconAnchor: [10, 10],
-        //             popupAnchor: [25, -10]
-        //         }));
-
-        //         marker.bindPopup( type + " Station: " + jsonResult[i].Name);
-
-        //         // store marker in array to be deleted later
-        //         poiMarkers.push(marker);
-                
-        //     }
-        // });
     }
 
 
@@ -1994,36 +1962,6 @@ function new_archived_incident_cluster_layer() {
         }
     }
 
-    function fetchAndProcessGeoJSON() {
-        const geojsonFilename = 'your_geojson_file.geojson';
-
-        fetch(`${mongoDBUrl}/files/${geojsonFilename}`)
-            .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.text();
-            })
-            .then(geojsonData => {
-            try {
-                // Parse the GeoJSON data into a JavaScript object
-                const geojsonObject = JSON.parse(geojsonData);
-
-                // Access the features array or other relevant data
-                const features = geojsonObject.features;
-
-                // Process the list of features
-                features.forEach(feature => {
-                console.log(feature.properties); // Access feature properties or modify as needed
-                });
-            } catch (error) {
-                console.error('Error parsing GeoJSON:', error);
-            }
-            })
-            .catch(error => {
-            console.error('Error:', error);
-            });
-        }
 
         // Call the function to retrieve and process the GeoJSON file
     let noisePoints2 = [];
@@ -2043,8 +1981,6 @@ function new_archived_incident_cluster_layer() {
             xhr.onload = async (event) => {
               const blob = xhr.response;
               data = JSON.parse(await blob.text())
-            
-                
 
               for(var i = 0; i < 10000000; i++) {
                 const json_object = data[String(i)];
@@ -2067,6 +2003,92 @@ function new_archived_incident_cluster_layer() {
         })
 
     
+    }
+
+
+
+    let current_watershed_shapefile = null;
+
+
+    function buildWatershedShapefile() {
+        
+
+        if(current_watershed_shapefile != null) {
+            map.removeLayer(current_watershed_shapefile);
+            current_watershed_shapefile = null;
+        }
+        if (!document.querySelector(".watershed").checked) {
+            return;
+        }
+
+        let shpfile = new L.Shapefile('../data/Watershed_Reach_Integrity_Scores.zip', {
+            onEachFeature: function(feature,layer){
+                console.log(feature);
+
+                let props = feature.properties;
+                console.log(props);
+
+              
+
+                let watershedInformationColor = (text) => {
+                    let trimmed_text = text.trim();
+                    if(trimmed_text == "BAD") {
+                        return "crimson";
+                    } 
+                    if(trimmed_text == "POOR") {
+                        return "lightred";
+                    } 
+                    if(trimmed_text == "MARGINAL") {
+                        return "darkorange";
+                    }
+                    if(trimmed_text == "FAIR") {
+                        return "gold";
+                    }
+                    if(trimmed_text == "GOOD") {
+                        return "lightgreen";
+                    }
+                    if(trimmed_text == "VERY GOOD") {
+                        return "mediumturquoise";
+                    } 
+                    if(trimmed_text == "EXCELLENT") {
+                        return "fuchsia";
+                    }
+                    if(trimmed_text == "NO DATA") {
+                        return "lightgray";
+                    }
+                    
+                    return "lightpurple";
+                };
+
+                console.log(watershedInformationColor(props.wqcd));
+                
+                let popup = `<b style="color:#191970; font-size:16px">${props.wshednm} Watershed</b> <br> 
+                        <b>Overall Quality:</b> <span style="background-color:${watershedInformationColor(props.ovcd)}"> ${props.ovcd} </span> <br>
+                        <b>Aquatic Life:</b> <span style="background-color:${watershedInformationColor(props.alcd)}">${props.alcd} </span>  <br>
+                        <b>Eutrophication:</b> <span style="background-color:${watershedInformationColor(props.eucd)}">${props.eucd}  </span> <br>
+                        <b>Habitat Quality:</b> <span style="background-color:${watershedInformationColor(props.habcd)}">${props.habcd}  </span> <br>
+                        <b>Sediment Quality:</b> <span style="background-color:${watershedInformationColor(props.sedcd)}">${props.sedcd}  </span> <br>
+                        <b>Vegetation:</b> <span style="background-color:${watershedInformationColor(props.vegcd)}">${props.vegcd} </span>  <br>
+                        <b>Water Chemistry:</b> <span style="background-color:${watershedInformationColor(props.wqcd)}">${props.wqcd}  </span> <br>` 
+                layer.options.color = watershedInformationColor(props.ovcd);
+                layer.options.outline = 'black';
+                layer.options.weight = 2;
+                console.log(props);
+
+                layer.bindPopup(popup);
+                
+            }
+        });
+
+
+      
+
+        shpfile.addTo(map);
+        current_watershed_shapefile = shpfile;
+
+    
+        
+        
     }
     
     function buildNoiseLayer() {
@@ -2196,6 +2218,16 @@ function new_archived_incident_cluster_layer() {
             buildPOIMap();
         });
 
+        document.querySelector(".water").addEventListener('click', function () {
+            buildWaterPollutionMap();
+        });
+
+
+        document.querySelector(".watershed").addEventListener('click', function () {
+            buildWatershedShapefile();
+        });
+
+        
         document.querySelector(".choropleth_incident").addEventListener('click', function () {
             buildNoiseLayer();
         });
@@ -2422,6 +2454,10 @@ function new_archived_incident_cluster_layer() {
     }
 
     map.on('click', function(e) {
+
+        if(current_noise_shapefile == null) {
+            return;
+        }
 
         const degreePerMeter = 1 / 111139;
         const pointRadiusDetection = 30;
