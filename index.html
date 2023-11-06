@@ -3,11 +3,11 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Urban Noise Map - Austin Digital Twin</title> 
-		<meta name="description" content="Austin urban noise map.">
+		<meta name="description" content="Austin urban pollution map.">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
  
 		<!-- Open Graph tags for social media -->
-		<meta property="og:title" content="Urban Noise Map - Austin Digital Twin">
+		<meta property="og:title" content="Urban Pollution Map - Austin Digital Twin">
 		<meta property="og:description" content="Austin urban mobility map.">
 		<meta property="og:image" content="https://img.itch.zone/aW1hZ2UvMTQ4MDY3NS85Mzc5NTEwLnBuZw==/original/IRJDeW.png">
 		<meta property="og:url" content="noise.austindigitaltwin.com">
@@ -29,12 +29,12 @@
 		<script src="https://smartcity.tacc.utexas.edu/FireIncident/assets/js/leaflet-rotatedMarker.js"></script>
 		<script src="https://smartcity.tacc.utexas.edu/FireIncident/assets/js/leaflet.shpfile.js"></script>
 		<script src="assets/js/leaflet-heat.js"></script>
-		<script src="assets/js/noisePoints.js"></script>
-		<script type="module" src="assets/js/noisePoints.js"></script>
 		<script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
 		<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
 		<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
 		<script src="https://unpkg.com/mapbox-gl-leaflet/leaflet-mapbox-gl.js"></script>
+
+		
 
 
 
@@ -177,7 +177,7 @@ Check My Location button code leaflet
 			  <div class="modal-content">
 				<div class="modal-header">
 				  <button type="button" class="close" data-dismiss="modal">&times;</button>
-				  <h4 class="modal-title">Urban Noise Map Information</h4>
+				  <h4 class="modal-title">Urban Pollution Map Information</h4>
 				</div>
 				<div class="modal-body" style="text-align:left;">
 					<h4>About</h4>
@@ -264,7 +264,7 @@ Check My Location button code leaflet
 		<!-- Fire Toggles -->
 
 
-			<h2 id="MapTitle" style="float: left; margin-right: 1rem; margin-top:5px; color: white;"><b><a style="color:white" href="#">Austin Noise Map</a></b></h2>
+			<h2 id="MapTitle" style="float: left; margin-right: 1rem; margin-top:5px; color: white;"><b><a style="color:white" href="#">Austin Pollution Map</a></b></h2>
 			</div>
 								<!--
                                 <div id="get-help">
@@ -429,6 +429,8 @@ Check My Location button code leaflet
 						<li><input style="margin-left: 15px;" type="checkbox" class="choropleth_incident"  />  Noise </li>
 						<b><li>Points of Interest</li></b>
 						<li><input style="margin-left: 15px;" type="checkbox" class="firedept"  />  Construction </li>
+						<li><input style="margin-left: 15px;" type="checkbox" class="water"  />  Water </li>
+						<li><input style="margin-left: 15px;" type="checkbox" class="watershed"  />  Watershed </li>
 						<b><li>Traffic Flow</li></b>
 						<li><input style="margin-left: 15px;" type="checkbox" class="traffic_condition"  />  Traffic Condition</li>
 
@@ -760,6 +762,7 @@ t>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.5.0/firebase-app-compat.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.5.0/firebase-storage-compat.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.5.0/firebase-database-compat.min.js"></script>
+		
 		<!-- <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
 		<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js"></script> -->
 
