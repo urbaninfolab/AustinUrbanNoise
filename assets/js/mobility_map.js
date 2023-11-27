@@ -2573,6 +2573,10 @@ function new_archived_incident_cluster_layer() {
     // addShapefileRadioListener(map);
     buildSelectBar(map);
     buildDropdownMenu(map);
+
+
+
+
     map._layersMaxZoom = 19;
 
     document.querySelector('.afd-legend').style.display = 'none';
@@ -2779,6 +2783,13 @@ L.Control.Watermark = L.Control.extend({
 
 L.control.watermark = function(opts) {
     return new L.Control.Watermark(opts);
+}
+
+// default for noise map
+let noiseCheckbox = document.querySelector(".choropleth_incident")
+console.log(noiseCheckbox.checked)
+if(noiseCheckbox.checked) {
+    buildNoiseLayer()
 }
 
 
