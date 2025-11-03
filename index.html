@@ -458,11 +458,11 @@ Check My Location button code leaflet
 					</div>
 				</div> -->
 			
-				<div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
+				<!-- <div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
 					<a href="https://smartcity.tacc.utexas.edu/FireIncident/3D" style="text-decoration:none;">
 						<h3 style="position:relative; top: -20px; color:white"><b>3D</b></h3>
 					<!--<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="25px" height="25px"  xml:space="preserve"> </img>-->
-				</a>
+				</a> -->
 
 			</div>
 			
@@ -799,5 +799,51 @@ t>
 		<script src="assets/js/attachModal.js"></script>
 		<script src="assets/js/getProperty.js"></script>
 		<script src="assets/js/createPDF.js"></script> -->
+		
+		<!-- Simple Usage Instructions Modal -->
+		<div id="usageModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow-y: auto;">
+			<div style="background-color: #bf5700; margin: 5% auto; padding: 25px; border: 1px solid #888; width: 85%; max-width: 650px; border-radius: 8px; position: relative; max-height: 85vh; overflow-y: auto; color: #fefefe;">
+				<span onclick="closeUsageModal()" style="position: absolute; right: 15px; top: 15px; color: #fefefe; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 1;">&times;</span>
+				<h2 style="margin-top: 0; color: #fefefe;">Welcome to Austin Urban Noise Map</h2>
+				<h3 style="margin-bottom: 20px; border-bottom: 2px solid #fefefe; padding-bottom: 10px; color: #fefefe;">Guide</h3>
+				
+				<div style="margin-bottom: 18px; display: flex; align-items: flex-start;">
+					<div style="flex-shrink: 0; margin-right: 12px;">
+						<img src="assets/images/layers.png" width="30px" height="30px" style="display: block;">
+					</div>
+					<div style="color: #fefefe; text-align: left;">
+						<strong style="color: #fefefe; display: block; margin-bottom: 5px; text-align: left;">Layer Control:</strong>
+						<span style="text-align: left;">Click the layer icon to open the data filter menu. Select different data layers including Noise, Points of Interest (Construction, Water, Watershed), and Traffic Flow.</span>
+					</div>
+				</div>
+				
+				<div style="margin-bottom: 18px; display: flex; align-items: flex-start;">
+					<div style="flex-shrink: 0; margin-right: 12px;">
+						<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="30px" height="30px" style="display: block;">
+					</div>
+					<div style="color: #fefefe; text-align: left;">
+						<strong style="color: #fefefe; display: block; margin-bottom: 5px; text-align: left;">Statistics:</strong>
+						<span style="text-align: left;">Click the stats icon to view detailed statistics and analytics about the noise data displayed on the map.</span>
+					</div>
+				</div>
+				
+				<div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(254, 254, 254, 0.3);">
+					<button onclick="closeUsageModal()" style="background-color: #fefefe; color: #bf5700; border: none; padding: 12px 40px; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#e8e8e8'" onmouseout="this.style.backgroundColor='#fefefe'">Got it!</button>
+				</div>
+			</div>
+		</div>
+		
+		<script>
+			function closeUsageModal() {
+				document.getElementById('usageModal').style.display = 'none';
+			}
+			
+			window.onload = function() {
+				setTimeout(function() {
+					document.getElementById('usageModal').style.display = 'block';
+				}, 500);
+			};
+		</script>
+		
 	</body>
 </html>      
