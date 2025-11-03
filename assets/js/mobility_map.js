@@ -2336,6 +2336,24 @@ function new_archived_incident_cluster_layer() {
         */
 
         });
+
+        // Initialize default checked checkboxes on page load
+        // Mapping of checkbox class names to their corresponding build functions
+        const checkboxBuildMap = {
+            'firedept': buildPOIMap,
+            'water': buildWaterPollutionMap,
+            'watershed': buildWatershedShapefile,
+            'choropleth_incident': buildNoiseLayer,
+            'traffic_condition': builtTrafficMap
+        };
+
+        // Automatically trigger build functions for all checked checkboxes
+        Object.keys(checkboxBuildMap).forEach(function(className) {
+            const checkbox = document.querySelector('.' + className);
+            if (checkbox && checkbox.checked) {
+                checkboxBuildMap[className]();
+            }
+        });
     }
 
     function addShapefileRadioListener(map) {
