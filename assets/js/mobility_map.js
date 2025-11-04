@@ -1723,39 +1723,32 @@ function new_archived_incident_cluster_layer() {
             return;
         }
 
-        showLoadingOverlay('Loading construction data...');
-
         var mechanical_permits = [];
 
         let scale = 1.278
         // https://data.austintexas.gov/resource/3syk-w9eu.json
 
-        // 使用简单的查询参数筛选MP类型和Active状态的记录
-        // 优先使用简单查询参数，如果失败则回退到获取全部数据
-        var apiUrl = 'https://data.austintexas.gov/resource/3syk-w9eu.json?permittype=MP&status_current=Active&$limit=5000';
+        // 尝试使用API查询参数直接筛选MP类型和Active状态的记录
+        // Socrata API支持$where查询参数
+        var apiUrl = 'https://data.austintexas.gov/resource/3syk-w9eu.json?$where=permittype=\'MP\' AND status_current=\'Active\'&$limit=5000';
         fetch(apiUrl)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok: ' + response.status);
+                        throw new Error('Network response was not ok');
                     }
                     return response.json(); 
-                })
-                .then(construction_json => {
-                    console.log('[buildPOIMap] 成功获取construction数据，记录数:', construction_json.length);
+                }).then(construction_json => {
                     for (var i = 0; i < construction_json.length; i++) {
                         permit = construction_json[i];
                         
-                        // filter permits (双重检查以确保数据正确)
+                        // filter permits
                         if(permit.permittype == "MP" && permit.status_current == "Active") {
-                            // 检查坐标是否有效，并转换为数字
-                            var lat = parseFloat(permit.latitude);
-                            var lng = parseFloat(permit.longitude);
-                            
-                            if (isNaN(lat) || isNaN(lng) || !lat || !lng) {
+                            // 检查坐标是否有效
+                            if (!permit.latitude || !permit.longitude) {
                                 continue;
                             }
 
-                            var marker = L.marker([lat, lng]).addTo(map);
+                            var marker = L.marker([permit.latitude, permit.longitude]).addTo(map);
                             // Change the icon to a custom icon
                       
                             marker.setIcon(L.icon({
@@ -1766,39 +1759,32 @@ function new_archived_incident_cluster_layer() {
                             }));
 
                             marker.bindPopup(`<b style="color:#191970; font-size:16px">Construction</b> <br> 
-                            <b>Description:</b> ${permit.description || 'N/A'} <br> ` );
+                            <b>Description:</b> ${permit.description} <br> ` );
                             poiMarkers.push(marker);
                         } 
                     }
-                    console.log('[buildPOIMap] 成功创建', poiMarkers.length, '个construction markers');
-                    hideLoadingOverlay();
-                })
-                .catch(error => {
-                    console.warn('[buildPOIMap] 筛选查询失败，回退到获取全部数据:', error);
+                  
+                }).catch(error => {
                     // 如果筛选查询失败，回退到获取全部数据
                     return fetch('https://data.austintexas.gov/resource/3syk-w9eu.json?$limit=5000')
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error('Network response was not ok: ' + response.status);
+                                throw new Error('Network response was not ok');
                             }
                             return response.json();
                         })
                         .then(construction_json => {
-                            console.log('[buildPOIMap] 回退方案：成功获取全部数据，记录数:', construction_json.length);
                             for (var i = 0; i < construction_json.length; i++) {
                                 permit = construction_json[i];
                                 
                                 // filter permits
                                 if(permit.permittype == "MP" && permit.status_current == "Active") {
-                                    // 检查坐标是否有效，并转换为数字
-                                    var lat = parseFloat(permit.latitude);
-                                    var lng = parseFloat(permit.longitude);
-                                    
-                                    if (isNaN(lat) || isNaN(lng) || !lat || !lng) {
+                                    // 检查坐标是否有效
+                                    if (!permit.latitude || !permit.longitude) {
                                         continue;
                                     }
 
-                                    var marker = L.marker([lat, lng]).addTo(map);
+                                    var marker = L.marker([permit.latitude, permit.longitude]).addTo(map);
                                     marker.setIcon(L.icon({
                                         iconUrl: "./assets/images/construction.png",
                                         iconSize: [20 * scale, 20],
@@ -1807,17 +1793,13 @@ function new_archived_incident_cluster_layer() {
                                     }));
 
                                     marker.bindPopup(`<b style="color:#191970; font-size:16px">Construction</b> <br> 
-                                    <b>Description:</b> ${permit.description || 'N/A'} <br> ` );
+                                    <b>Description:</b> ${permit.description} <br> ` );
                                     poiMarkers.push(marker);
                                 } 
                             }
-                            console.log('[buildPOIMap] 回退方案：成功创建', poiMarkers.length, '个construction markers');
-                            hideLoadingOverlay();
-                        })
-                        .catch(error => {
-                            console.error('[buildPOIMap] 获取数据时出错:', error);
-                            hideLoadingOverlay();
                         });
+                }).catch(error => {
+                    console.error('[buildPOIMap] 获取数据时出错:', error);
                 });
         
     }
@@ -2026,49 +2008,6 @@ function new_archived_incident_cluster_layer() {
     let noisePoints2 = [];
     let current_noise_shapefile = null;
     
-    // Loading overlay functions
-    function showLoadingOverlay(loadingText = 'Loading...') {
-        const loadingOverlay = document.getElementById('data-loading-overlay');
-        const progressBar = document.getElementById('loading-progress-bar');
-        const percentageText = document.getElementById('loading-percentage');
-        const textElement = document.getElementById('loading-text');
-        
-        if (loadingOverlay) {
-            if (textElement) textElement.textContent = loadingText;
-            loadingOverlay.style.display = 'flex';
-            if (progressBar) progressBar.style.width = '0%';
-            if (percentageText) percentageText.textContent = '0%';
-            
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 15 + 5;
-                if (progress > 90) progress = 90;
-                if (progressBar) progressBar.style.width = progress + '%';
-                if (percentageText) percentageText.textContent = Math.floor(progress) + '%';
-            }, 150);
-            loadingOverlay.dataset.progressInterval = progressInterval;
-        }
-    }
-    
-    function hideLoadingOverlay() {
-        const loadingOverlay = document.getElementById('data-loading-overlay');
-        const progressBar = document.getElementById('loading-progress-bar');
-        const percentageText = document.getElementById('loading-percentage');
-        
-        if (loadingOverlay) {
-            if (progressBar) progressBar.style.width = '100%';
-            if (percentageText) percentageText.textContent = '100%';
-            if (loadingOverlay.dataset.progressInterval) {
-                clearInterval(parseInt(loadingOverlay.dataset.progressInterval));
-            }
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-                if (progressBar) progressBar.style.width = '0%';
-                if (percentageText) percentageText.textContent = '0%';
-            }, 300);
-        }
-    }
-    
     function buildNoiseHeatmap() {
         // Check if checkbox is still checked before starting async operation
         if (!document.querySelector(".choropleth_incident").checked) {
@@ -2084,7 +2023,6 @@ function new_archived_incident_cluster_layer() {
         function createHeatmapFromData(data) {
             // Check checkbox state before adding layer
             if (!document.querySelector(".choropleth_incident").checked) {
-                hideLoadingOverlay();
                 return;
             }
 
@@ -2105,7 +2043,6 @@ function new_archived_incident_cluster_layer() {
                 heat.addTo(map);
                 current_noise_shapefile = heat;
             }
-            hideLoadingOverlay();
         }
 
         // Try to load from Firebase Storage
@@ -2138,11 +2075,7 @@ function new_archived_incident_cluster_layer() {
         }).catch(error => {
             // Fallback to local file when Firebase Storage quota exceeded or other errors
             console.warn('[buildNoiseHeatmap] Firebase Storage failed, falling back to local file:', error.message);
-            if (document.querySelector(".choropleth_incident").checked) {
-                loadLocalNoiseData();
-            } else {
-                hideLoadingOverlay();
-            }
+            loadLocalNoiseData();
         });
 
         // Load data from local cleaned_noise.zip
@@ -2194,7 +2127,6 @@ function new_archived_incident_cluster_layer() {
                 })
                 .catch(function(error) {
                     console.error('[buildNoiseHeatmap] Failed to load cleaned_noise.zip:', error.message);
-                    hideLoadingOverlay();
                 });
         }
     }
@@ -2295,7 +2227,7 @@ function new_archived_incident_cluster_layer() {
             return
         }
 
-        showLoadingOverlay('Loading noise data...');
+       
         buildNoiseHeatmap();
         
        
