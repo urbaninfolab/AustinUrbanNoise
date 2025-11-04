@@ -1,10 +1,5 @@
-var activeFires = new L.FeatureGroup();
-var inactiveFires = new L.FeatureGroup();
 var purpleAirMonitors = new L.FeatureGroup();
 var microsoftAirMonitors = new L.FeatureGroup();
-let transitLocations = new L.FeatureGroup();
-let scooterLocations = new L.FeatureGroup();
-let incidentLocations = new L.FeatureGroup();
 let waterPollution = new L.FeatureGroup();
 var currentShapefile = null;
 
@@ -51,408 +46,16 @@ var markers = L.markerClusterGroup({
         }
 });
 
-var transit_markers = L.markerClusterGroup({
-    showCoverageOnHover: false,
-    //zoomToBoundsOnClick: false,
-    iconCreateFunction: function(cluster) {
-        var childCount = cluster.getChildCount();
-        var markers = cluster.getAllChildMarkers();
-        return new L.DivIcon({ html: '<div><span><b>' + childCount + '</b></span></div>', className: 'marker-cluster marker-cluster-black', iconSize: new L.Point(40, 40) });
-    }
-});
-
-var scooter_markers = L.markerClusterGroup({
-    showCoverageOnHover: false,
-    //zoomToBoundsOnClick: false,
-    iconCreateFunction: function(cluster) {
-        var childCount = cluster.getChildCount();
-        var markers = cluster.getAllChildMarkers();
-        return new L.DivIcon({ html: '<div><span><b>' + childCount + '</b></span></div>', className: 'marker-cluster marker-cluster-darkgreen', iconSize: new L.Point(40, 40) });
-    }
-});
-
-var archived_incident_markers = L.markerClusterGroup({
-    showCoverageOnHover: false,
-    //zoomToBoundsOnClick: false,
-    iconCreateFunction: function(cluster) {
-        var childCount = cluster.getChildCount();
-        var markers = cluster.getAllChildMarkers();
-        return new L.DivIcon({ html: '<div><span><b>' + childCount + '</b></span></div>', className: 'marker-cluster marker-cluster-darkorange', iconSize: new L.Point(40, 40) });
-    }
-});
-
-function new_transit_cluster_layer() {
-    let cluster_layer = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        //zoomToBoundsOnClick: false,
-        iconCreateFunction: function(cluster) {
-            var childCount = cluster.getChildCount();
-            var markers = cluster.getAllChildMarkers();
-            return new L.DivIcon({ html: '<div><span><b>' + childCount + '</b></span></div>', className: 'marker-cluster marker-cluster-black', iconSize: new L.Point(40, 40) });
-        }
-    });
-    return cluster_layer
-};
-function new_scooter_cluster_layer() {
-    let cluster_layer = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        //zoomToBoundsOnClick: false,
-        iconCreateFunction: function(cluster) {
-            var childCount = cluster.getChildCount();
-            var markers = cluster.getAllChildMarkers();
-            return new L.DivIcon({ html: '<div><span><b>' + childCount + '</b></span></div>', className: 'marker-cluster marker-cluster-darkgreen', iconSize: new L.Point(40, 40) });
-        }
-    });
-    return cluster_layer
-};
-function new_archived_incident_cluster_layer() {
-    let cluster_layer = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        //zoomToBoundsOnClick: false,
-        iconCreateFunction: function(cluster) {
-            var childCount = cluster.getChildCount();
-            var markers = cluster.getAllChildMarkers();
-            return new L.DivIcon({ html: '<div><span><b>' + childCount + '</b></span></div>', className: 'marker-cluster marker-cluster-darkorange', iconSize: new L.Point(40, 40) });
-        }
-    });
-    return cluster_layer
-};
-
-    //Input: map instance and an array of string
-    async function mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag) {
-        
-        // Remove all fires from map
-        if(map != null) {
-            map.removeLayer(activeFires);
-            map.removeLayer(inactiveFires);
-
-            activeFires.clearLayers();
-            inactiveFires.clearLayers();
-            onehourForecastGroup.clearLayers();
-            twohourForecastGroup.clearLayers();
-            threehourForecastGroup.clearLayers();
-
-            addMapLayer(map)
-
-        }
-
-
-        let sampleData = [
-            {
-                "title": "BRUSH - Brush Fire",
-                "link": "http://maps.google.com/maps?q=30.767735,-97.876783",
-                "guid": {
-                    "@isPermaLink": "false",
-                    "#text": "9B5927CEC83EE94F602974CA14A6FFD0569B777A"
-                },
-                "description": "6780-8398 N US 183 | NON - ADVISED INCIDENT | 16:48:52",
-                "pubDate": "Mon, 14 Feb 2022 16:48:52 CDT",
-                "active_status": "yes"
-            },
-            {
-                "title": "Traffic Injury Pri 4F",
-                "link": "http://maps.google.com/maps?q=30.399615,-97.850904",
-                "guid": {
-                    "@isPermaLink": "false",
-                    "#text": "E1CF984DAC4C3E377F4662FCCCE3602106165EEF"
-                },
-                "description": "11213 Fm 2222 Rd | AFD | 16:53:43",
-                "pubDate": "Mon, 14 Feb 2022 16:53:43 CDT",
-                "active_status": "yes"
-            },
-            {
-                "title": "ALARM - Fire Alarm",
-                "link": "http://maps.google.com/maps?q=30.321938,-97.808294",
-                "guid": {
-                    "@isPermaLink": "false",
-                    "#text": "3F8BED0F0E2ADB62764BF557B3C92D7E6B2E9FEC"
-                },
-                "description": "2537 WAYMAKER WAY | AFD | 16:14:52",
-                "pubDate": "Mon, 14 Feb 2022 16:14:52 CDT",
-                "active_status": "no"
-            },
-            {
-                "title": "RESQT - Rescue Task Force",
-                "link": "http://maps.google.com/maps?q=30.501646,-97.790996",
-                "guid": {
-                    "@isPermaLink": "false",
-                    "#text": "CEC1022BEFB63F729C72D1EE8A071FCD2876D273"
-                },
-                "description": "15116 Dodge Cattle Cv | AFD | 16:37:09",
-                "pubDate": "Mon, 14 Feb 2022 16:37:09 CDT",
-                "active_status": "no"
-            }
-        ];
-
-        let rawData = [];
-        let cities = ["", "Dallas", "Houston","SanAntonio","OklahomaCity","LosAngeles","Riverside","ElPaso","SanDiego","Seattle"];
-        console.log(date)
-        for(city in cities) {
-        for (let i = 0; i < dateArray.length; i++) {
-            try{
-                let date = dateArray[i];
-                let jsonUrl = '../data/' + date + '-FireMap' + cities[city] + '.json';
-                let response = await fetch(jsonUrl);
-                let currentData = await response.json();
-
-                
-                // console.log(i);
-                // console.log(rawData);
-                //if (i === 0) {
-                //    rawData = currentData.rss.channel.item;
-                //} else {
-                    rawData.push.apply(rawData, currentData.rss.channel.item);
-                //}
-            } catch(e) {
-                break;
-            }
-            }
-        }
-
-        let fireData = rawData; 
-        //let fireData = sampleData;
-
-        // check if we have data point
-        if (fireData != undefined) {
-            // check if we only have one data point
-            if (!Array.isArray(fireData)) {
-                processData(fireData)
-            } else {
-                // loop through each data point
-                fireData.forEach(data => {
-                  //  if ((inactive_flag === false && data.active_status === "yes") || inactive_flag === true) {
-                        try { 
-                        processData(data)
-                        }
-                        catch(e) { 
-                        console.log(e)
-                        }
-                    }
-
-                //}
-                );
-            }
-        }
-
-        if(currentShapefile == null) {
-            buildShapefile(map, shapefile_display_flag);
-        }
-
-        if (purple_air_diaplay_flag == true) {
-            mapPurpleAirData(map);
-        }
-        if (microsoft_air_display_flag == true) {
-            mapMicrosoftAirData(map);
-        }
-
-        // hide air quality legend
-        var airQualityLegend = document.querySelector('.air-quality-legend');
-        if (!purple_air_diaplay_flag && !microsoft_air_display_flag) {
-            airQualityLegend.style.display = 'none';
-        } else {
-            //airQualityLegend.style.display = 'flex';
-
-        }
-
-    }
-
-    function processData(data) {
-        let windDirections = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-        let angles = [0, 25, 45, 65, 90, 115, 135, 155, 180, 205, 225, 245, 270, 295, 315, 335];
-        var activeFireIcon = L.icon({
-            iconUrl: "https://smartcity.tacc.utexas.edu/FireIncident/assets/images/fire.png",
-            iconSize: [70, 70], // size of the icon
-        });
-        var windDirectionIcon = L.icon({
-            iconUrl: "https://smartcity.tacc.utexas.edu/FireIncident/assets/images/arrow.png",
-            iconSize: [70, 70], // size of the icon
-        });
-        var deactiveFireIcon = L.icon({
-            iconUrl: "https://smartcity.tacc.utexas.edu/FireIncident/assets/images/deactive_fire.png",
-            iconSize: [70, 70], // size of the icon
-        });
-        let link = data.link;
-        let longNLatString = link.replace('http://maps.google.com/maps?q=', '');
-        let longNLatArray = longNLatString.split(',');
-        longNLatArray.forEach((x, i) => longNLatArray[i] = parseFloat(x))
-
-        weatherDataAPI = 'https://api.weather.gov/points/' + longNLatString;
-
-        var marker = L.marker(longNLatArray).addTo(map);
-
-        let icon = activeFireIcon;
-        if (data.active_status != "yes") {
-            icon = deactiveFireIcon
-            inactiveFires.addLayer(marker);
-        } else {
-            activeFires.addLayer(marker);
-        }
-
-        marker.setIcon(icon);
-
-        getWeatherAPI(weatherDataAPI, marker, data, windDirectionIcon, windDirections, angles, longNLatArray, longNLatString);
-    }
-
-    async function getWeatherAPI(url, marker, fireData, windDirectionIcon, windDirections, angles, longNLatArray, longNLatString) {
-        var response = await fetch(url);
-        var api = await response.json();
-        var hourlyApiUrl = api.properties.forecastHourly;
-        // console.log(hourlyApiUrl);
-        var response = await fetch(hourlyApiUrl);
-        var hourlyData = await response.json();
-        hourlyData1 = hourlyData.properties.periods[0];
-
-
-        var markerPopup = `
-        <span>
-        <div style="
-            font-size: xx-large;
-            font-family: sans-serif;
-            text-align: center;
-            border-color: green;
-            border-radius: 20px;
-            color: black;
-        ">
-        <div class="location-info">
-            <span>${fireData.title}</span><BR>
-
-        </div>
-        </div>
-        <b>
-        <span>Location: ${fireData.description.split('|')[0]}</span><BR>
-        <span>Publish Date: ${fireData.pubDate}</span><BR>
-        `;
-
-        markerPopup += `<br><a id="moreButton" href="#" onclick="addMore()">More...</a>`
-
-        markerPopup += `<div id="more" style="display:none">
-        <div class="cur-weather-info">
-            <span>Temperature: ${hourlyData1.temperature}℉ </span><BR>
-            <span>Forecast: ${hourlyData1.shortForecast} </span><BR>
-            <span>Wind Spead: ${hourlyData1.windSpeed}</span><BR>
-            <span>Wind Direction: ${hourlyData1.windDirection} </span>
-        </div>`;
-
-        var tempTable = buildTemperatureTable(hourlyData.properties.periods);
-        markerPopup += tempTable;
-
-        markerPopup += `</div>`;
-
-        marker.bindPopup(markerPopup, {
-            maxWidth : 251
-        });;
-
-        // map wind direction
-        let index = windDirections.indexOf(hourlyData1.windDirection);
-        let angle = angles[index];
-        if (fireData.active_status === "yes") {
-            /*var windDirectionMarker = L.marker(longNLatArray, {
-                icon: windDirectionIcon,
-                rotationAngle: 90,
-                rotationOrigin: 'center',
-                zIndexOffset: -1,
-            }).addTo(map); */
-            addSmokeRegions(map, "../data/" + longNLatString)
-        }
-
-    }
-
-    var onehourForecastGroup = L.layerGroup();
-    var twohourForecastGroup = L.layerGroup();
-    var threehourForecastGroup = L.layerGroup();
-
-    function addSmokeRegions(map, KMLstring) {
-        addForecastedSmoke(map, KMLstring + ".kml", onehourForecastGroup);
-        addForecastedSmoke(map, KMLstring + ".kml2", twohourForecastGroup);
-        addForecastedSmoke(map, KMLstring + ".kml3", threehourForecastGroup);
-    }
-
-    function addForecastedSmoke(map, KMLstring, forecastGroup) {
-                console.log("Added smoke map " + KMLstring);
-                // Load kml file
-                try {
-                fetch(KMLstring)
-                .then(res => res.text())
-                .then(kmltext => {
-                    // Create new kml overlay
-                    const parser = new DOMParser();
-                    const kml = parser.parseFromString(kmltext, 'text/xml');
-                    const track = new L.KML(kml);
-                    forecastGroup.addLayer(track);
-                });
-            } catch (e) {
-                console.log(e);
-            }
-    }
-
-    // build temperature table for next 5 hours
-    function buildTemperatureTable(hourlyData) {
-        var data = ``;
-        hourlyData.forEach((x, i) => {
-            if (i <= 5) {
-                var startTime = x.startTime.split('T')[1].split(':')[0];
-                data += `
-                <tr>
-                    <td>${startTime}:00</td>
-                    <td>${x.temperature}℉</td>
-                    <td>${x.shortForecast}</td>
-                    <td>${x.windDirection}</td>
-                </tr>
-                `;
-            }
-
-        });
-        var table = `
-        <table  style="
-        border-collapse: collapse;
-        margin: 15px 0;
-        font-size: 0.9em;
-        font-family: sans-serif;
-        min-width: 210px;
-        min-height: 30px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-    ">
-        <thead  style="
-        text-align: center;
-        padding: 10px 40px;
-        font-size: smaller;
-        background-color: #009375;
-        color: #ffffff;
-        text-align: center;
-    ">
-            <tr>
-                <th>Time</th>
-                <th>Temperature</th>
-                <th>Forecast</th>
-                <th>Wind Direction</th>
-            </tr>
-        <thead>
-        <tbody>
-            ${data}
-        </tbody>
-        <table/>
-        `;
-        return table;
-    }
-
     function addMapLayer(map) {
-        // L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=podpBxEPp3rRpfqa6JY8', {
-        //     attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
-        // }).addTo(map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        console.log("BEING CALLED");
-        map.addLayer(activeFires)
-        if(inactive_flag)
-        map.addLayer(inactiveFires)
         if(purple_air_diaplay_flag && microsoft_air_display_flag)
         map.addLayer(markers);
         else if(purple_air_diaplay_flag)
         map.addLayer(purpleAirMonitors)
         else
         map.addLayer(microsoftAirMonitors)
-    
     }
 
     // placeholders for the L.marker and L.circle representing user's current position and accuracy
@@ -483,34 +86,6 @@ function new_archived_incident_cluster_layer() {
     current_position = L.marker(latlng).addTo(map);
     current_accuracy = L.circle(latlng, radius).addTo(map);
 
-    var warningLevel = "no";
-    var it = 0;
-    for (var i in onehourForecastGroup._layers) {
-        for (var j in onehourForecastGroup._layers[i]._layers) {
-            for (var k in onehourForecastGroup._layers[i]._layers[j]._layers) {
-                //console.log(onehourForecastGroup._layers[i]._layers[j]._layers[k]);
-                var inSmoke = onehourForecastGroup._layers[i]._layers[j]._layers[k].getBounds().contains(current_position._latlng);
-                //console.log(inSmoke)
-                if(inSmoke) {
-                    //console.log(it);
-                    warningLevel = (it==0) ? "a Moderate" : (it==1) ? "an Unhealthy for Sensitive Groups" : (it==2) ? "an Unhealthy" : (it==3) ? "a Very Unhealthy" : (it==4) ? "a Hazardous" : "no";
-                }
-                it++;
-            }
-            it = 0;
-        }
-    }
-
-    // Display warning message
-    console.log("Your area currently has " + warningLevel + " amount of smoke.")
-
-    content = "Your area currently has " + warningLevel + " amount of smoke.";
-
-    current_position.bindPopup(content, {
-        closeButton: true
-    });
-    current_position.openPopup();
-
     map.setView(latlng);
     map.fitBounds(current_accuracy.getBounds());
 
@@ -539,34 +114,6 @@ function new_archived_incident_cluster_layer() {
     current_position = L.marker(latlng).addTo(map);
     current_accuracy = L.circle(latlng, radius).addTo(map);
 
-    var warningLevel = "no";
-    var it = 0;
-    for (var i in onehourForecastGroup._layers) {
-        for (var j in onehourForecastGroup._layers[i]._layers) {
-            for (var k in onehourForecastGroup._layers[i]._layers[j]._layers) {
-                //console.log(onehourForecastGroup._layers[i]._layers[j]._layers[k]);
-                var inSmoke = onehourForecastGroup._layers[i]._layers[j]._layers[k].getBounds().contains(current_position._latlng);
-                //console.log(inSmoke)
-                if(inSmoke) {
-                    //console.log(it);
-                    warningLevel = (it==0) ? "a Moderate" : (it==1) ? "an Unhealthy for Sensitive Groups" : (it==2) ? "an Unhealthy" : (it==3) ? "a Very Unhealthy" : (it==4) ? "a Hazardous" : "no";
-                }
-                it++;
-            }
-            it = 0;
-        }
-    }
-
-    // Display warning message
-    console.log("Your area currently has " + warningLevel + " amount of smoke.")
-
-    content = "Your area currently has " + warningLevel + " amount of smoke.";
-
-    current_position.bindPopup(content, {
-        closeButton: true
-    });
-    current_position.openPopup();
-
     map.setView(latlng);
     map.fitBounds(current_accuracy.getBounds());
 
@@ -588,86 +135,6 @@ function new_archived_incident_cluster_layer() {
         });*/
     }
 
-    function getToday() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Today";
-        var datePicker = document.querySelector('.date-picker');
-        datePicker.style.display = 'none';
-                                // clear all markers and rebuild map layer
-                                /*map.eachLayer(function (layer) {
-                                    map.removeLayer(layer);
-                                });
-                                addMapLayer(map);*/
-                                // map today's fire data
-                                dateArray = [];
-                                var today = new Date();
-                                var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + today.getDate()).slice(-2);
-                                dateArray.push(date);
-                                mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                                // show status toggle button and uncheck checkbox
-                                //statusToggle.style.display = 'flex';
-                                //checkbox.checked = false;
-    }
-
-    function getYesterday() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Yesterday";
-        var datePicker = document.querySelector('.date-picker');
-        datePicker.style.display = 'none';
-                        // clear all markers and rebuild map layer
-                        /*map.eachLayer(function (layer) {
-                            map.removeLayer(layer);
-                        });
-                        addMapLayer(map);*/
-                        // map yesterday's fire data
-                        dateArray = [];
-                        var today = new Date();
-                        var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + (today.getDate() - 1)).slice(-2);
-                        dateArray.push(date);
-                        mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                        //statusToggle.style.display = 'none';
-
-                    }
-
-
-    function get3Days() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Last 3 Days";
-        var datePicker = document.querySelector('.date-picker');
-        datePicker.style.display = 'none';
-                        // clear all markers and rebuild map layer
-                        /*map.eachLayer(function (layer) {
-                            map.removeLayer(layer);
-                        });
-                        addMapLayer(map);*/
-                        // map fire data of past 3 days 
-                        dateArray = [];
-                        var today = new Date();
-                        for (let i = 0; i < 3; i++) {
-                            var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + (today.getDate() - i)).slice(-2);
-                            dateArray.push(date);
-                        }
-                        mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                        //statusToggle.style.display = 'none';
-
-    }
-
-    function getCustom() {
-        document.getElementById("CurrentSelectedDate").innerHTML = "⠀ ⠀᠎⠀ ⠀Custom";;
-
-        var datePicker = document.querySelector('.date-picker');
-        datePicker.style.display = 'none';
-        // add event listener
-        datePicker.addEventListener('change', (event) => {
-            // clear all markers and rebuild map layer
-            /*map.eachLayer(function (layer) {
-                map.removeLayer(layer);
-            });
-            addMapLayer(map);*/
-            mapFireIncident(map, [event.target.value], inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag)
-        })
-                                // show date selector
-                                datePicker.style.display = 'block';
-                                //statusToggle.style.display = 'none';
-    }
-
     function buildSelectBar(map) {
         var checkList = document.getElementById('filter-menu');
         checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
@@ -678,136 +145,15 @@ function new_archived_incident_cluster_layer() {
         }
         // set up value of date picker
         var dateControl = document.querySelector('input[type="date"]');
-        dateControl.value = date;
-        dateControl.max = date;
+        if (dateControl) {
+            dateControl.value = date;
+            dateControl.max = date;
+        }
         // hide date picker
         var datePicker = document.querySelector('.date-picker');
-        datePicker.style.display = 'none';
-        // add event listener
-        datePicker.addEventListener('change', (event) => {
-            // clear all markers and rebuild map layer
-            /*map.eachLayer(function (layer) {
-                map.removeLayer(layer);
-            });
-            addMapLayer(map);*/
-            mapFireIncident(map, [event.target.value], inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag)
-        })
-
-        //build select button
-        const barOuter = document.querySelector(".bar-outer");
-        const options = document.querySelectorAll(".bar-grey .option");
-        let current = 1;
-        options.forEach((option, i) => (option.index = i + 1));
-        options.forEach(option =>
-            option.addEventListener("click", function () {
-                barOuter.className = "bar-outer";
-                barOuter.classList.add(`pos${option.index}`);
-                if (option.index > current) {
-                    barOuter.classList.add("right");
-                } else if (option.index < current) {
-                    barOuter.classList.add("left");
-                }
-                current = option.index;
-                // console.log('index: ', current)
-
-                datePicker.style.display = 'none';
-                // define button onclick action
-                switch (current) {
-                    // Today Button
-                    case 1:
-                        // clear all markers and rebuild map layer
-                        /*map.eachLayer(function (layer) {
-                            map.removeLayer(layer);
-                        });
-                        addMapLayer(map);*/
-                        // map today's fire data
-                        dateArray = [];
-                        var today = new Date();
-                        var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + today.getDate()).slice(-2);
-                        dateArray.push(date);
-                        mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                        // show status toggle button and uncheck checkbox
-                        statusToggle.style.display = 'flex';
-                        checkbox.checked = false;
-                        break;
-
-                    // Yesterday Button
-                    case 2:
-                        // clear all markers and rebuild map layer
-                        /*map.eachLayer(function (layer) {
-                            map.removeLayer(layer);
-                        });
-                        addMapLayer(map);*/
-                        // map yesterday's fire data
-                        dateArray = [];
-                        var today = new Date();
-                        var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + (today.getDate() - 1)).slice(-2);
-                        dateArray.push(date);
-                        mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                        statusToggle.style.display = 'none';
-                        break;
-
-                    // Past 3 days Button
-                    case 3:
-                        // clear all markers and rebuild map layer
-                        /*map.eachLayer(function (layer) {
-                            map.removeLayer(layer);
-                        });
-                        addMapLayer(map);*/
-                        // map fire data of past 3 days 
-                        dateArray = [];
-                        var today = new Date();
-                        for (let i = 0; i < 3; i++) {
-                            var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + (today.getDate() - i)).slice(-2);
-                            dateArray.push(date);
-                        }
-                        mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                        statusToggle.style.display = 'none';
-                        break;
-
-                    // Custom Button
-                    case 4:
-                        // show date selector
-                        datePicker.style.display = 'block';
-                        statusToggle.style.display = 'none';
-                        break;
-                }
-            }));
-    }
-
-    function buildStatusToggleButton(map, checkbox) {
-        
-        if (checkbox.checked) {
-            inactive_flag = true;
-            map.addLayer(inactiveFires)
-        } else {
-            inactive_flag = false;
-            map.removeLayer(inactiveFires);
+        if (datePicker) {
+            datePicker.style.display = 'none';
         }
-
-
-        /*
-        checkbox.addEventListener('click', function (e) {
-            // checkbox checked => all fire
-            if (checkbox.checked) {
-                inactive_flag = true;
-            } else {
-                inactive_flag = false;
-            }
-            // clear all markers and rebuild map layer
-            map.eachLayer(function (layer) {
-                map.removeLayer(layer);
-            });
-            addMapLayer(map);
-            // map today's fire data
-            dateArray = [];
-            var today = new Date();
-            var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + today.getDate()).slice(-2);
-            dateArray.push(date);
-            mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-
-        })
-        */
     }
 
 
@@ -817,9 +163,6 @@ function new_archived_incident_cluster_layer() {
         let shapefileName = "";
         let popupContent = ``;
         let shapefile = "";
-        var fireRiskLegend = document.querySelector('.fire-risk-legend');
-        var afdLegend = document.querySelector('.afd-legend');
-        var hviLegend = document.querySelector('.hvi-legend');
 
         switch (shapefile_display_flag) {
             case 'fire-risk-radio':
@@ -873,11 +216,6 @@ function new_archived_incident_cluster_layer() {
                     
                     
                 })
-                // hide fire risk legend
-                document.getElementById('fireRiskType').innerHTML = "Fire Vulnerability Risk: "
-                fireRiskLegend.style.display = 'flex';
-                afdLegend.style.display = 'none';
-                hviLegend.style.display = 'none';
                 shpfile.addTo(map);
                 currentShapefile = shpfile;
                 break;
@@ -919,9 +257,6 @@ function new_archived_incident_cluster_layer() {
                         // }
                     }
                 })
-                afdLegend.style.display = 'flex';
-                fireRiskLegend.style.display = 'none';
-                hviLegend.style.display = 'none';
                 shpfile.addTo(map);
                 currentShapefile = shpfile;
                 break;
@@ -957,11 +292,6 @@ function new_archived_incident_cluster_layer() {
                     }
                 })
                 // color by exposure, color map by 5 colors
-
-
-                hviLegend.style.display = 'flex';
-                afdLegend.style.display = 'none';
-                fireRiskLegend.style.display = 'none';
                 shpfile.addTo(map);
                 currentShapefile = shpfile;
                 break;
@@ -1073,11 +403,6 @@ function new_archived_incident_cluster_layer() {
                     shpfile = cachedShapefile;
                 }
            
-                // hide fire risk legend
-                document.getElementById('fireRiskType').innerHTML = "Urban Fire Risk: "
-                fireRiskLegend.style.display = 'flex';
-                afdLegend.style.display = 'none';
-                hviLegend.style.display = 'none';
                 shpfile.addTo(map);
                 cachedShapefile = shpfile;
                 currentShapefile = shpfile;
@@ -1085,12 +410,7 @@ function new_archived_incident_cluster_layer() {
 
 
             case 'none-radio':
-                //fireRiskLegend.style.display = 'none';
-                //afdLegend.style.display = 'none';
                 currentShapefile = null;
-                fireRiskLegend.style.display = 'none';
-                afdLegend.style.display = 'none';
-                hviLegend.style.display = 'none';
                 break;
 
         }
@@ -1213,79 +533,6 @@ function new_archived_incident_cluster_layer() {
     }
 
 
-    async function mapTransitData(map) {
-        // Delete all markers
-        for (let i = 0; i < transit_markers.length; i++) {
-            transit_markers[i].remove();
-        }
-        for (let i = 0; i < transitLocations.length; i++) {
-            transitLocations[i].remove();
-        }
-        if (!document.querySelector(".transit").checked) {
-            return
-        }
-        url = "https://smartcity.tacc.utexas.edu/data/transportation/transitposition.json"
-        let response = await fetch(url);
-        let transit_json = response.json();
-        console.log(transit_json)
-        for (let i = 0; i < transit_json["entity"].length; i++) {
-            if (!transit_json["entity"][i]["vehicle"].hasOwnProperty("trip")) {
-                continue;
-            }
-            let y = transit_json["entity"][i]["vehicle"]["position"]["latitude"];
-            let x = transit_json["entity"][i]["vehicle"]["position"]["longitude"];
-            let transit_marker = new L.marker([y,x]);
-            let iconLink = "assets/images/bus_icon.png";
-            transit_marker.setIcon(L.icon({
-                iconUrl: iconLink,
-                iconSize: [24, 32],
-                iconAnchor: [12, 32],
-                popupAnchor: [0, -30]
-            }));
-            var route_id = transit_json["entity"][i]["vehicle"]["trip"]["routeId"]
-            var vehicle_id = transit_json["entity"][i]["id"]
-            var speed = transit_json["entity"][i]["vehicle"]["position"]["speed"]
-            transit_marker.bindPopup(" Vehicle ID: " + vehicle_id + ", Route: " + route_id + ", Speed: " + speed + "m/s");
-
-            transit_markers.addLayer(transit_marker)
-            transitLocations.addLayer(transit_marker)
-        }
-    }
-
-    async function mapScooterData(map) {
-        // Delete all markers
-        for (let i = 0; i < scooter_markers.length; i++) {
-            scooter_markers[i].remove();
-        }
-        for (let i = 0; i < scooterLocations.length; i++) {
-            scooterLocations[i].remove();
-        }
-        if (!document.querySelector(".micromobility").checked) {
-            return
-        }
-        url = "https://smartcity.tacc.utexas.edu/data/transportation/freebike.json"
-        let response = await fetch(url);
-        let scooter_json = response.json();
-        console.log(scooter_json)
-        for (let i = 0; i < scooter_json["data"]["bikes"].length; i++) {
-            let y = scooter_json["data"]["bikes"][i]["lat"];
-            let x = scooter_json["data"]["bikes"][i]["lon"];
-            let scooter_marker = new L.marker([y,x]);
-            let iconLink = "assets/images/scooter_icon.png";
-            scooter_marker.setIcon(L.icon({
-                iconUrl: iconLink,
-                iconSize: [24, 32],
-                iconAnchor: [12, 32],
-                popupAnchor: [0, -30]
-            }));
-            var bike_id = scooter_json["data"]["bikes"][i]["bike_id"]
-            var bike_type = scooter_json["data"]["bikes"][i]["vehicle_type_id"]
-            scooter_marker.bindPopup(" ID: " + bike_id + ", Type: " + bike_type);
-
-            scooter_markers.addLayer(scooter_marker)
-            scooterLocations.addLayer(scooter_marker)
-        }
-    }
 
 
     function addMore() {
@@ -1720,8 +967,13 @@ function new_archived_incident_cluster_layer() {
         var fireDept = document.querySelector(".firedept").checked;
 
         if (!fireDept) {
+            // Hide loading overlay when checkbox is unchecked
+            hideLoadingOverlay();
             return;
         }
+        
+        // Show loading overlay
+        showLoadingOverlay('Loading construction data...');
 
         var mechanical_permits = [];
 
@@ -1763,6 +1015,9 @@ function new_archived_incident_cluster_layer() {
                             poiMarkers.push(marker);
                         } 
                     }
+                    
+                    // Hide loading overlay after data is loaded
+                    hideLoadingOverlay();
                   
                 }).catch(error => {
                     // 如果筛选查询失败，回退到获取全部数据
@@ -1797,222 +1052,108 @@ function new_archived_incident_cluster_layer() {
                                     poiMarkers.push(marker);
                                 } 
                             }
+                            
+                            // Hide loading overlay after fallback data is loaded
+                            hideLoadingOverlay();
                         });
                 }).catch(error => {
                     console.error('[buildPOIMap] 获取数据时出错:', error);
+                    // Hide loading overlay on error
+                    hideLoadingOverlay();
                 });
         
     }
 
 
-    function buildTranMap() {
-        for (let i = 0; i < transitLocations.length; i++) {
-            transitLocations[i].remove();
-        }
-        if (!document.querySelector(".transit").checked) {
-            return
-        }
-        let transit = document.querySelector(".transit").checked;
-        // mobility JSON data
-        if (transit) {
-            transit_markers = new_transit_cluster_layer();
-            fetch('https://smartcity.tacc.utexas.edu/data/transportation/transitposition.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json(); 
-                })
-                .then(transit_json => {
-                    console.log(transit_json);
-                    
-                    for (let i = 0; i < transit_json["entity"].length; i++) {
-                        if (!transit_json["entity"][i]["vehicle"].hasOwnProperty("trip")) {
-                            continue;
-                        }
-                        let y = transit_json["entity"][i]["vehicle"]["position"]["latitude"];
-                        let x = transit_json["entity"][i]["vehicle"]["position"]["longitude"];
-                        let transit_marker = new L.marker([y,x]);
-                        let iconLink = "assets/images/bus_icon.png";
-                        transit_marker.setIcon(L.icon({
-                            iconUrl: iconLink,
-                            iconSize: [24, 32],
-                            iconAnchor: [12, 32],
-                            popupAnchor: [0, -30]
-                        }));
-                        var route_id = transit_json["entity"][i]["vehicle"]["trip"]["routeId"]
-                        var vehicle_id = transit_json["entity"][i]["id"]
-                        var speed = transit_json["entity"][i]["vehicle"]["position"]["speed"]
-                        transit_marker.bindPopup(" Vehicle ID: " + vehicle_id + ", Route: " + route_id + ", Speed: " + speed + "m/s");
-            
-                        transit_markers.addLayer(transit_marker)
-                        transitLocations.addLayer(transit_marker)
-                    }
-                })
-                .catch(error => {
-                    console.log('Error:', error);
-                });
-            map.addLayer(transit_markers)
-        }
-        
-    }
-
-
-    function buildScooterMap() {
-        for (let i = 0; i < scooterLocations.length; i++) {
-            scooterLocations[i].remove();
-        }
-        if (!document.querySelector(".micromobility").checked) {
-            return
-        }
-
-        let micromobility = document.querySelector(".micromobility").checked;
-
-        // mobility JSON data
-        if (micromobility) {
-            scooter_markers = new_scooter_cluster_layer();
-            fetch('https://smartcity.tacc.utexas.edu/data/transportation/freebike.json')
-              .then(response => {
-                // Check if the response is ok (status code in the range 200-299)
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json(); // Parse the response body as JSON
-              })
-              .then(scooter_json => {
-                console.log(scooter_json);
-                for (let i = 0; i < scooter_json["data"]["bikes"].length; i++) {
-                    let y = scooter_json["data"]["bikes"][i]["lat"];
-                    let x = scooter_json["data"]["bikes"][i]["lon"];
-                    let scooter_marker = new L.marker([y,x]);
-                    let iconLink = "assets/images/scooter_icon.png";
-                    scooter_marker.setIcon(L.icon({
-                        iconUrl: iconLink,
-                        iconSize: [24, 32],
-                        iconAnchor: [12, 32],
-                        popupAnchor: [0, -30]
-                    }));
-                    var bike_id = scooter_json["data"]["bikes"][i]["bike_id"]
-                    var bike_type = scooter_json["data"]["bikes"][i]["vehicle_type_id"]
-                    scooter_marker.bindPopup(" ID: " + bike_id + ", Type: " + bike_type);
-        
-                    scooter_markers.addLayer(scooter_marker)
-                    scooterLocations.addLayer(scooter_marker)
-                }
-            })
-            .catch(error => {
-                console.log('Error:', error);
-            });
-            map.addLayer(scooter_markers)
-        }
-    }
-
-    let incident_markers = []
-    function buildLiveIncidentMap() {
-        // Delete all markers
-        for (var i = 0; i < incident_markers.length; i++) {
-            incident_markers[i].remove();
-        }
-        let incident = document.querySelector(".active_incident").checked;
-        if (incident) {
-            console.log("Active Incident checked")
-            // let incident_json = JSON.parse('[{"Published Date": "09/26/2023 09:27:10 PM +0000", "Issue Reported": "Crash Service", "Address": "4000-4017 S 1st St", "Latitude": 30.225932, "Longitude": -97.769825, "Status": "ACTIVE", "time": "2023-09-26 16:27:10"}, {"Published Date": "09/26/2023 10:33:20 PM +0000", "Issue Reported": "Crash Urgent", "Address": "13318-13534 N Sh 45 W Wb", "Latitude": 30.471481, "Longitude": -97.788028, "Status": "ACTIVE", "time": "2023-09-26 17:33:20"}, {"Published Date": "09/26/2023 10:54:35 PM +0000", "Issue Reported": "Crash Service", "Address": "Provines Dr / N Lamar Blvd", "Latitude": 30.376738, "Longitude": -97.689309, "Status": "ACTIVE", "time": "2023-09-26 17:54:35"}, {"Published Date": "09/26/2023 11:35:47 PM +0000", "Issue Reported": "COLLISION", "Address": "19503 Old Burnet Rd", "Latitude": 30.46461, "Longitude": -97.959907, "Status": "ACTIVE", "time": "2023-09-26 18:35:47"}, {"Published Date": "09/26/2023 11:54:22 PM +0000", "Issue Reported": "Crash Service", "Address": "COLINTON AVE / HARRIS BRANCH PKWY", "Latitude": 30.372672, "Longitude": -97.611924, "Status": "ACTIVE", "time": "2023-09-26 18:54:22"}, {"Published Date": "09/26/2023 11:54:33 PM +0000", "Issue Reported": "Crash Service", "Address": "1971-1975 S Pleasant Valley Rd", "Latitude": 30.233645, "Longitude": -97.723418, "Status": "ACTIVE", "time": "2023-09-26 18:54:33"}]')
-            fetch('https://smartcity.tacc.utexas.edu/data/transportation/incident_active.json')
-              .then(response => {
-                // Check if the response is ok (status code in the range 200-299)
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                  }
-                  return response.json(); // Parse the response body as JSON
-              })
-              .then(incident_json => {
-                console.log(incident_json)
-                for (let i = 0; i < incident_json.length; i++) {
-                    let y = incident_json[i]["Latitude"];
-                    let x = incident_json[i]["Longitude"];
-                    let incident_marker = new L.marker([y,x]).addTo(map);
-                    let iconLink = "assets/images/active_incident_icon.png"
-                    incident_marker.setIcon(L.icon({
-                        iconUrl: iconLink,
-                        iconSize: [22, 32],
-                        iconAnchor: [11, 32],
-                        popupAnchor: [0, -30]
-                    }));
-                    let issue = incident_json[i]["Issue Reported"];
-                    let address = incident_json[i]["Address"];
-                    let pub_time = incident_json[i]["time"];
-                    let status = incident_json[i]["Status"];
-                    incident_marker.bindPopup(" Issue: " + issue + ", Address: " + address + ", Time: " + pub_time + ", Status: " + status);
-                    incident_markers.push(incident_marker);
-                }
-              })
-              .catch(error => {
-                console.log('Error:', error);
-              });
-        }
-    }
-
-    function buildArchivedIncidentMap() {
-        for (let i = 0; i < incidentLocations.length; i++) {
-            incidentLocations[i].remove();
-        }
-        if (!document.querySelector(".archived_incident").checked) {
-            return
-        }
-
-        let archived_incident = document.querySelector(".archived_incident").checked;
-
-        // mobility JSON data
-        if (archived_incident) {
-            archived_incident_markers = new_archived_incident_cluster_layer();
-            fetch('https://smartcity.tacc.utexas.edu/data/transportation/incident_archived.json')
-              .then(response => {
-                // Check if the response is ok (status code in the range 200-299)
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json(); // Parse the response body as JSON
-              })
-              .then(archived_incident_json => {
-                console.log(archived_incident_json);
-                for (let i = 0; i < archived_incident_json.length; i++) {
-                    let y = archived_incident_json[i]["Latitude"];
-                    let x = archived_incident_json[i]["Longitude"];
-                    let archived_incident_marker = new L.marker([y,x]);
-                    let iconLink = "assets/images/archived_incident_icon.png"
-                    archived_incident_marker.setIcon(L.icon({
-                        iconUrl: iconLink,
-                        iconSize: [22, 32],
-                        iconAnchor: [11, 32],
-                        popupAnchor: [0, -30]
-                    }));
-                    let issue = archived_incident_json[i]["Issue Reported"];
-                    let address = archived_incident_json[i]["Address"];
-                    let pub_time = archived_incident_json[i]["time"];
-                    let status = archived_incident_json[i]["Status"];
-                    archived_incident_marker.bindPopup(" Issue: " + issue + ", Address: " + address + ", Time: " + pub_time + ", Status: " + status);
-                    
-                    archived_incident_markers.addLayer(archived_incident_marker)
-                    incidentLocations.addLayer(archived_incident_marker)
-                }
-            })
-            .catch(error => {
-                console.log('Error:', error);
-            });
-            map.addLayer(archived_incident_markers)
-        }
-    }
 
 
         // Call the function to retrieve and process the GeoJSON file
     let noisePoints2 = [];
     let current_noise_shapefile = null;
     
+    // Generic loading overlay functions
+    function showLoadingOverlay(loadingText = 'Loading...') {
+        const loadingOverlay = document.getElementById('data-loading-overlay');
+        const progressBar = document.getElementById('loading-progress-bar');
+        const percentageText = document.getElementById('loading-percentage');
+        const textElement = document.getElementById('loading-text');
+        
+        if (loadingOverlay) {
+            // Set loading text
+            if (textElement) {
+                textElement.textContent = loadingText;
+            }
+            
+            loadingOverlay.style.display = 'flex';
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+            if (percentageText) {
+                percentageText.textContent = '0%';
+            }
+            
+            // Simulate progress animation
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90; // Don't complete until actual data loads
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+                if (percentageText) {
+                    percentageText.textContent = Math.floor(progress) + '%';
+                }
+            }, 200);
+            
+            // Store interval ID for cleanup
+            loadingOverlay.dataset.progressInterval = progressInterval;
+        }
+    }
+    
+    function hideLoadingOverlay() {
+        const loadingOverlay = document.getElementById('data-loading-overlay');
+        const progressBar = document.getElementById('loading-progress-bar');
+        const percentageText = document.getElementById('loading-percentage');
+        
+        if (loadingOverlay) {
+            // Complete the progress bar
+            if (progressBar) {
+                progressBar.style.width = '100%';
+                progressBar.style.animation = 'none';
+            }
+            if (percentageText) {
+                percentageText.textContent = '100%';
+            }
+            
+            // Clear progress interval if exists
+            if (loadingOverlay.dataset.progressInterval) {
+                clearInterval(parseInt(loadingOverlay.dataset.progressInterval));
+            }
+            
+            // Hide after a short delay to show completion
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                    progressBar.style.animation = 'progress-animation 2s ease-in-out infinite';
+                }
+                if (percentageText) {
+                    percentageText.textContent = '0%';
+                }
+            }, 300);
+        }
+    }
+
     function buildNoiseHeatmap() {
         // Check if checkbox is still checked before starting async operation
         if (!document.querySelector(".choropleth_incident").checked) {
+            // Hide loading overlay when checkbox is unchecked
+            hideLoadingOverlay();
             return;
         }
+        
+        // Show loading overlay
+        showLoadingOverlay('Loading noise data...');
 
         const storage = app.storage();
         const noiseRef = storage.ref('noise_points.json');
@@ -2023,6 +1164,7 @@ function new_archived_incident_cluster_layer() {
         function createHeatmapFromData(data) {
             // Check checkbox state before adding layer
             if (!document.querySelector(".choropleth_incident").checked) {
+                hideLoadingOverlay();
                 return;
             }
 
@@ -2043,45 +1185,63 @@ function new_archived_incident_cluster_layer() {
                 heat.addTo(map);
                 current_noise_shapefile = heat;
             }
+            
+            // Hide loading overlay after data is processed
+            hideLoadingOverlay();
         }
 
-        // Try to load from Firebase Storage
+        // Try to load from Firebase Storage using getDownloadURL
+        // Note: CORS issues may occur if Firebase Storage bucket CORS is not configured
         noiseRef.getDownloadURL().then((url) => {
-            // Check again before making XHR request
+            // Check again before making request
             if (!document.querySelector(".choropleth_incident").checked) {
+                hideLoadingOverlay();
                 return;
             }
 
-            const xhr = new XMLHttpRequest();
-            xhr.responseType = 'blob';
-            xhr.onload = async (event) => {
-              // Check checkbox state again before adding layer (most important check)
-              if (!document.querySelector(".choropleth_incident").checked) {
-                  return;
-              }
+            // Use fetch with proper error handling
+            // The download URL from Firebase should be a signed URL that works
+            fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                credentials: 'omit',
+                cache: 'default'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text(); // Use text() instead of blob() for JSON
+            })
+            .then(text => {
+                // Check checkbox state again before adding layer
+                if (!document.querySelector(".choropleth_incident").checked) {
+                    hideLoadingOverlay();
+                    return;
+                }
 
-              const blob = xhr.response;
-              data = JSON.parse(await blob.text())
-              createHeatmapFromData(data);
-
-            };
-            xhr.onerror = function() {
+                const data = JSON.parse(text);
+                createHeatmapFromData(data);
+            })
+            .catch(error => {
                 // If Firebase URL load fails, fallback to local file
+                console.warn('[buildNoiseHeatmap] Firebase Storage fetch failed, falling back to local file:', error.message);
                 loadLocalNoiseData();
-            };
-            xhr.open('GET', url);
-            xhr.send();
+            });
         
         }).catch(error => {
-            // Fallback to local file when Firebase Storage quota exceeded or other errors
-            console.warn('[buildNoiseHeatmap] Firebase Storage failed, falling back to local file:', error.message);
+            // Fallback to local file when Firebase Storage getDownloadURL fails
+            // This includes CORS preflight failures
+            console.warn('[buildNoiseHeatmap] Firebase Storage getDownloadURL failed, falling back to local file:', error.message);
             loadLocalNoiseData();
+            // Note: hideLoadingOverlay will be called in loadLocalNoiseData or its catch block
         });
 
         // Load data from local cleaned_noise.zip
         function loadLocalNoiseData() {
             // Check checkbox state
             if (!document.querySelector(".choropleth_incident").checked) {
+                hideLoadingOverlay();
                 return;
             }
 
@@ -2127,6 +1287,8 @@ function new_archived_incident_cluster_layer() {
                 })
                 .catch(function(error) {
                     console.error('[buildNoiseHeatmap] Failed to load cleaned_noise.zip:', error.message);
+                    // Hide loading overlay on error
+                    hideLoadingOverlay();
                 });
         }
     }
@@ -2335,11 +1497,6 @@ function new_archived_incident_cluster_layer() {
             else
                 checkList.classList.add('visible');
         }
-        // add event listener
-        var checkboxActiveFire = document.querySelector(".active-fire");
-        checkboxActiveFire.addEventListener('click', function () {
-            buildStatusToggleButton(map, checkboxActiveFire);
-        });
 
         document.querySelector(".firedept").addEventListener('click', function () {
             buildPOIMap();
@@ -2369,38 +1526,6 @@ function new_archived_incident_cluster_layer() {
         });
 
 
-        var checkboxOneSmoke = document.querySelector(".one-hour-smoke");
-        var checkboxTwoSmoke = document.querySelector(".two-hour-smoke");
-        var checkboxThreeSmoke = document.querySelector(".three-hour-smoke");
-
-        checkboxOneSmoke.addEventListener('click', function () {
-            changeSmokeForecast(checkboxOneSmoke, onehourForecastGroup);
-        });
-        checkboxTwoSmoke.addEventListener('click', function () {
-            changeSmokeForecast(checkboxTwoSmoke, twohourForecastGroup);
-        });
-        checkboxThreeSmoke.addEventListener('click', function () {
-            changeSmokeForecast(checkboxThreeSmoke, threehourForecastGroup);
-        });
-
-        function changeSmokeForecast(checkbox, forecastGroup) {
-            // Clear other smoke forecast layers,
-            // add relevant KML for current forecast
-            if (checkbox.checked) {
-                map.removeLayer(onehourForecastGroup);
-                map.removeLayer(twohourForecastGroup);
-                map.removeLayer(threehourForecastGroup);
-                checkboxOneSmoke.checked = false;
-                checkboxTwoSmoke.checked = false;
-                checkboxThreeSmoke.checked = false;
-                checkbox.checked = true;
-                forecastGroup.addTo(map);
-            } else {
-                map.removeLayer(forecastGroup);
-            }
-        }
-
-        changeSmokeForecast(checkboxOneSmoke, onehourForecastGroup);
 
         /*var checkLocation = document.querySelector(".option2");
         checkLocation.addEventListener('click', function () {
@@ -2429,13 +1554,6 @@ function new_archived_incident_cluster_layer() {
                     map.removeLayer(purpleAirMonitors)
             }
             // console.log(purple_air_diaplay_flag);
-            // clear all markers and rebuild map layer
-            /*map.eachLayer(function (layer) {
-                map.removeLayer(layer);
-            });
-            addMapLayer(map);
-            mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-        */
 
         });
 
@@ -2459,13 +1577,6 @@ function new_archived_incident_cluster_layer() {
                 else
                     map.removeLayer(microsoftAirMonitors)
             }
-            // clear all markers and rebuild map layer
-            /*map.eachLayer(function (layer) {
-                map.removeLayer(layer);
-            });
-            addMapLayer(map);
-            mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-        */
 
         });
 
@@ -2494,25 +1605,9 @@ function new_archived_incident_cluster_layer() {
             radios[i].onclick = function () {
                 shapefile_display_flag = this.value;
                 // console.log(shapefile_display_flag)
-                // clear all markers and rebuild map layer
-                /*map.eachLayer(function (layer) {
-                    map.removeLayer(layer);
-                });
-                addMapLayer(map);
-                mapFireIncident(map, dateArray, inactive_flag, shapefile_display_flag, purple_air_diaplay_flag, microsoft_air_display_flag);
-                */
                if(currentShapefile != null) 
                     map.removeLayer(currentShapefile)
                 buildShapefile(map, shapefile_display_flag)
-
-                var checkboxOneSmoke = document.querySelector(".one-hour-smoke");
-                var checkboxTwoSmoke = document.querySelector(".two-hour-smoke");
-                var checkboxThreeSmoke = document.querySelector(".three-hour-smoke");
-                checkboxOneSmoke.checked = false;
-                checkboxOneSmoke.checked = true;
-                checkboxOneSmoke.dispatchEvent(new Event('click'));
-                checkboxTwoSmoke.checked = false;
-                checkboxThreeSmoke.checked = false;
             }
         }
     }
@@ -2728,11 +1823,6 @@ function new_archived_incident_cluster_layer() {
 
 
     map._layersMaxZoom = 19;
-
-    document.querySelector('.afd-legend').style.display = 'none';
-    document.querySelector('.air-quality-legend').style.display = 'none';
-    document.querySelector('.fire-risk-legend').style.display = 'none';
-    document.querySelector('.hvi-legend').style.display = 'none';
 
 
 
@@ -2952,22 +2042,3 @@ L.control.watermark({ position: 'bottomright' }).addTo(map);
     spinner.style.display = 'none';
 
     document.getElementsByClassName( 'leaflet-control-attribution' )[0].style.display = 'none';
-
-
-
-    //buildWeeklyLineChart();
-    //buildWeeklyColumnChart();
-    //buildPerHourBoxChart();
-
-    // fetch('../data/AverageFire.json').then(response => {
-    //     // Replace all instances of "NaN" with 0
-    //     return response.text().then(text => text.replace(/NaN/g, 0));
-    //     }).then(jsondata => {
-
-    //     result = JSON.parse(jsondata)
-    //     console.log(result)
-
-    //     window.AverageFire = result;
-    // });
-
-    

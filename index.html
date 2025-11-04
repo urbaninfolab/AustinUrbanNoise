@@ -86,9 +86,9 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 		<!-- preload essential fonts -->
-		<link rel="preload" href="https://smartcity.tacc.utexas.edu/FireIncident/assets/fonts/ManifoldDSA/ManifoldDSA-Medium.woff" as="font" type="font/woff" crossorigin>
-		<link rel="preload" href="https://smartcity.tacc.utexas.edu/FireIncident/assets/fonts/ManifoldDSA/ManifoldDSA-ExtraBold.woff" as="font" type="font/woff" crossorigin>
-		<link rel="preload" href="https://smartcity.tacc.utexas.edu/FireIncident/assets/fonts/FontAwesome/fa-solid-900.woff" as="font" type="font/woff" crossorigin>
+		<link rel="preload" href="assets/fonts/ManifoldDSA/ManifoldDSA-Medium.woff" as="font" type="font/woff" crossorigin>
+		<link rel="preload" href="assets/fonts/ManifoldDSA/ManifoldDSA-ExtraBold.woff" as="font" type="font/woff" crossorigin>
+		<link rel="preload" href="assets/fonts/FontAwesome/fa-solid-900.woff" as="font" type="font/woff" crossorigin>
 
 
 		<!-- Global site tag (gtag.js) - Google Analytics -->
@@ -163,6 +163,20 @@ Check My Location button code leaflet
 			<div></div>
 			<div></div>
 			<div></div>
+		</div>
+
+		<!-- Loading Overlay for Data Loading -->
+		<div id="data-loading-overlay" style="display: none;">
+			<div class="loading-overlay-content">
+				<div class="loading-spinner-wrapper">
+					<div class="loading-spinner"></div>
+				</div>
+				<div class="loading-text" id="loading-text">Loading...</div>
+				<div class="loading-progress-container">
+					<div class="loading-progress-bar" id="loading-progress-bar"></div>
+				</div>
+				<div class="loading-percentage" id="loading-percentage">0%</div>
+			</div>
 		</div>
 		
 		  <!-- Modal -->
@@ -275,13 +289,6 @@ Check My Location button code leaflet
 
 			<h2 id="MapTitle" style="float: left; margin-right: 1rem; margin-top:5px; color: white;"><b><a style="color:white" href="#">Austin Noise Map</a></b></h2>
 			</div>
-								<!--
-                                <div id="get-help">
-                                        <p><a onclick="stats()" href="#">View Stats</a></p>
-                                        <p><a onclick="info()" href="#">More Information</a></p>
-                                </div>
-								-->
-
 
 								
 		<!-- College/Project Branding -->
@@ -295,25 +302,6 @@ Check My Location button code leaflet
 
 
 			<div style="float: right; margin-right: 2rem; margin-top:-10px;" class="date-bar">
-								<!--
-
-				<div class="select-bar" style="opacity: 0;">
-					<div class="bar bar-grey">
-						<div class="option">Today</div>
-						<div class="option">Yesterday</div>
-						<div class="option">Past 3 Days</div>
-						<div class="option">Custom</div>
-					</div>
-					<div class="bar-outer">
-						<div class="bar bar-purple">
-							<div class="option">Today</div>
-							<div class="option">Yesterday</div>
-							<div class="option">Past 3 Days</div>
-							<div class="option">Custom</div>
-						</div>
-					</div>
-				</div>
-									-->
 
 				<div class="date-picker">
 					<!--<label for="start">Start date:</label>-->
@@ -366,31 +354,7 @@ Check My Location button code leaflet
 					</ul>
 				</div>
 
-				<!-- <div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
-					<a onclick="stats()" href="#">
-					<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="25px" height="25px"  xml:space="preserve"> </img>
-				</a> -->
-
 				</div>
-	
-
-				<!--
-				<div class="select-bar" width="10%" style="margin-left:100px; width: 300px;">
-					<div class="bar bar-grey" style="width: 300px;">
-						<div class="option2" style="width: 300px;">Check my Location</div>
-					</div>
-					<div class="bar-outer2" style="width: 300px;">
-						<div class="bar bar-purple bar-purple2" style="width: 300px;">
-							<div class="option2" style="width: 300px;">Check my Location</div>
-						</div>
-					</div>
-				</div> -->
-			
-				<!-- <div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
-					<a href="https://smartcity.tacc.utexas.edu/FireIncident/3D" style="text-decoration:none;">
-						<h3 style="position:relative; top: -20px; color:white"><b>3D</b></h3>
-					<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="25px" height="25px"  xml:space="preserve"> </img>
-				</a> -->
 
 			</div>
 			
@@ -403,152 +367,8 @@ Check My Location button code leaflet
         </a>
     </div>
 </section>
-
-	<!--
-		<div id="top-container">
-			<div id="title">
-				<h2 style="margin-top:12px; margin-right: 100px;"><a href>Active Fire Incidents Map</a></h2>
-
-				<div style="clear: both;"></div>
-
-				<div class="date-bar">
-				<div class="select-bar">
-					<div class="bar bar-grey">
-						<div class="option">Today</div>
-						<div class="option">Yesterday</div>
-						<div class="option">Past 3 Days</div>
-						<div class="option">Custom</div>
-					</div>
-					<div class="bar-outer">
-						<div class="bar bar-purple">
-							<div class="option">Today</div>
-							<div class="option">Yesterday</div>
-							<div class="option">Past 3 Days</div>
-							<div class="option">Custom</div>
-						</div>
-					</div>
-				</div>
-	
-				<div class="date-picker">
-					<label for="start">Start date:</label>
-					<input type="date" id="start" name="trip-start" min="2022-01-31">
-				</div>
-	
-
-	
-				<div id="filter-menu" class="dropdown-check-list" tabindex="100">
-					<span class="anchor">Data Filter</span>
-					<ul class="items">
-						<li>- Fire Data -</li>
-						<li><input type="checkbox" class="active-fire" checked />Inactive Fire </li>
-						<li>- Smoke Data -</li>
-						<li><input type="checkbox" class="one-hour-smoke" checked />1 Hour Forecast </li>
-						<li><input type="checkbox" class="two-hour-smoke" checked />2 Hour Forecast </li>
-						<li><input type="checkbox" class="three-hour-smoke" checked />3 Hour Forecast </li>
-						<li>- Air Data -</li>
-						<li><input type="checkbox" class="purple-air" checked />PurpleAir Data</li>
-						<li><input type="checkbox" class="microsoft-air" checked />MSR Air Quality Sensors </li>
-						<li>- Shapefile -</li>
-						<li><input type="radio" id="fire-risk-radio" name="shapefile-radio" value="fire-risk-radio"
-								checked />
-							<label for="fire-risk-radio">Fire Vulnerability</label>
-						</li>
-						<li><input type="radio" id="afd-radio" name="shapefile-radio" value="afd-radio" />
-							<label for="afd-radio">AFD Converage</label>
-						</li>
-						<li><input type="radio" id="hvi-radio" name="shapefile-radio" value="hvi-radio" />
-							<label for="hvi-radio">HVI Map</label>
-						</li>
-						<li><input type="radio" id="no-shapefile" name="shapefile-radio" value="none-radio" />
-							<label for="none-radio">None</label>
-						</li>
-					</ul>
-				</div>
-	
-				<div class="select-bar" width="10%" style="margin-left:100px; width: 300px;">
-					<div class="bar bar-grey" style="width: 300px;">
-						<div class="option2" style="width: 300px;">Check my Location</div>
-					</div>
-					<div class="bar-outer2" style="width: 300px;">
-						<div class="bar bar-purple bar-purple2" style="width: 300px;">
-							<div class="option2" style="width: 300px;">Check my Location</div>
-						</div>
-					</div>
-				</div>
-	
-			</div>
-			
-
-			</div>
-			
-			
-			<div id="search-input-container">
-				<input
-					id="search-input"
-					name="search"
-					type="text"
-					spellcheck="false"
-					placeholder="Search by address"
-				/>
-				<div id="clear" tabindex="0"><img src="assets/images/times-dark.svg" /></div>
-			</div>
-
-			<div id="search-results-container">
-				<div id="search-results-counter"></div>
-				<ul id="search-results-list"></ul>
-				<div id="selected-container">
-					<table id="info-table">
-						<tr id="affiliated-row">
-							<td id="affiliated-label">Affiliated with:</td>
-							<td id="affiliated-value"></td>
-						</tr>
-						<tr id="owned-row">
-							<td id="owned-label">Units owned:</td>
-							<td id="owned-value"></td>
-						</tr>
-						<tr id="taxpayer-row">
-							<td id="taxpayer-label">Property taxpayer:</td>
-							<td id="taxpayer-value"></td>
-						</tr>
-					</table>
-					<button id="download-button" class="button-hover"></button>
-					<div id="bottom-links">
-						<p id="data-info-link" class="property-details-link" tabindex="0">See an issues with our data?</p>
-						<p id="additional-details-link" class="property-details-link" tabindex="0">Additional property details</p>
-						<div style="clear: both;"></div>
-					</div>
-				</div>
-			</div>
-
-		</div>
--->
 		
 			
-			<div class="legend-wrapper">
-				<div class="air-quality-legend" style="margin-top: -50px;">
-					<div style="background-color: white;">
-						<span>Air Quality: </span>
-					</div>
-					<div style="background-color: #9cd74e;">
-						<span>0</span>
-					</div>
-					<div style="background-color: #facf39;">
-						<span>50</span>
-					</div>
-					<div style="background-color: #f68f47;">
-						<span>100</span>
-					</div>
-					<div style="background-color: #f55e5f;">
-						<span style="color:#ffffff">150</span>
-					</div>
-					<div style="background-color: #a070b5;">
-						<span style="color:#ffffff">200</span>
-					</div>
-					<div style="background-color: #a06a7b;">
-						<span style="color:#ffffff">300</span>
-					</div>
-				</div>
-			</div>
 			<div class="legend-wrapper">
 				<div class="air-quality-legend" style="margin-top: -30px;">
 					<div style="background-color: white; width:325px">
@@ -617,68 +437,6 @@ Check My Location button code leaflet
 
 			</script>
 
-
-		
-			<div class="legend-wrapper">
-				<div class="fire-risk-legend">
-					<div style="background-color: white;">
-						<span id="fireRiskType">Fire Risk: </span>
-					</div>
-					<div style="background-color: red;">
-						<span style="color:#ffffff">Highest</span>
-					</div>
-					<div style="background-color: orange;">
-						<span>Elevated</span>
-					</div>
-					<div style="background-color: yellow;">
-						<span>Normal</span>
-					</div>
-				</div>
-			</div>			
-			<div class="legend-wrapper">
-				<div class="afd-legend">
-					<div style="background-color: white;">
-						<span>AFD Response Rate: </span>
-					</div>
-					<div style="background-color: rgb(1, 106, 1);">
-						<span style="color:#ffffff">90% and up</span>
-					</div>
-					<div style="background-color: #699d50;">
-						<span style="color:#ffffff">80% ~ 89%</span>
-					</div>
-					<div style="background-color: orange;">
-						<span style="color:#ffffff">70% ~ 79%</span>
-					</div>
-					<div style="background-color: #ff5500;">
-						<span style="color:#ffffff">50% ~ 67%</span>
-					</div>
-					<div style="background-color: #704489;">
-						<span style="color:#ffffff">Less than 50%</span>
-					</div>
-				</div>
-			</div>
-			<div class="legend-wrapper">
-				<div class="hvi-legend">
-					<div style="background-color: white;">
-						<span>AFD Response Rate: </span>
-					</div>
-					<div style="background-color: rgb(1, 106, 1);">
-						<span>90% and up</span>
-					</div>
-					<div style="background-color: #699d50;">
-						<span>80% ~ 89%</span>
-					</div>
-					<div style="background-color: orange;">
-						<span>60% ~ 79%</span>
-					</div>
-					<div style="background-color: #ff5500;">
-						<span>40% ~ 59%</span>
-					</div>
-					<div style="background-color: #704489;">
-						<span>Less than 40%</span>
-					</div>
-				</div>
-			</div>
 		
 		</div>
 
@@ -701,32 +459,8 @@ t>
 		<!-- Google Map Layers -->
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0IIh7KXVmItoyyPktQpcgAzmbflbWR4s" async defer></script>
 
-		<!-- Google Cloud Firebase
-		<script src="https://www.gstatic.com/firebasejs/7.16.1/firebase-app.js"></script>
-		<script src="https://www.gstatic.com/firebasejs/7.16.1/firebase-analytics.js"></script>
-		<script src="https://www.gstatic.com/firebasejs/7.16.1/firebase-auth.js"></script>
-		<script src="https://www.gstatic.com/firebasejs/7.16.1/firebase-firestore.js"></script>
-
-		<script src="assets/js/jspdf.min.js"></script>
-		
-		<script src="assets/js/jspdf.plugin.autotable.js"></script>
-
-		<script src="assets/fonts/ManifoldDSA/js/ManifoldDSA-normal.js"></script>
-		<script src="assets/fonts/ManifoldDSA/js/ManifoldDSA-bold.js"></script> -->
-
 		
 		<script src="https://smartcity.tacc.utexas.edu/FireIncident/assets/js/checkIE.js"></script>
-
-		<!--
-		<script src="assets/js/constants.js"></script>
-
-		<script src="assets/js/firebase.js"></script>
-
-		<script src="assets/js/matchAddresses.js"></script>
-		<script src="assets/js/modalContent.js"></script>
-		<script src="assets/js/attachModal.js"></script>
-		<script src="assets/js/getProperty.js"></script>
-		<script src="assets/js/createPDF.js"></script> -->
 		
 		<!-- Simple Usage Instructions Modal -->
 		<div id="usageModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow-y: auto;">
