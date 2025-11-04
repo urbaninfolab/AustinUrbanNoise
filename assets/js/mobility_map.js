@@ -589,7 +589,7 @@ function new_archived_incident_cluster_layer() {
     }
 
     function getToday() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Today";
+        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Today";
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
                                 // clear all markers and rebuild map layer
@@ -609,7 +609,7 @@ function new_archived_incident_cluster_layer() {
     }
 
     function getYesterday() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Yesterday";
+        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Yesterday";
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
                         // clear all markers and rebuild map layer
@@ -629,7 +629,7 @@ function new_archived_incident_cluster_layer() {
 
 
     function get3Days() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Last 3 Days";
+        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Last 3 Days";
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
                         // clear all markers and rebuild map layer
@@ -650,7 +650,7 @@ function new_archived_incident_cluster_layer() {
     }
 
     function getCustom() {
-        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Custom";
+        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Custom";
 
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
@@ -1644,7 +1644,8 @@ function new_archived_incident_cluster_layer() {
             map.removeLayer(current_waterpollution_map);
             current_waterpollution_map = null;
         }
-        if (!document.querySelector(".water").checked) {
+        var waterCheckbox = document.querySelector(".water");
+        if (!waterCheckbox || !waterCheckbox.checked) {
             return;
         }
 
@@ -2017,7 +2018,8 @@ function new_archived_incident_cluster_layer() {
             map.removeLayer(current_watershed_shapefile);
             current_watershed_shapefile = null;
         }
-        if (!document.querySelector(".watershed").checked) {
+        var watershedCheckbox = document.querySelector(".watershed");
+        if (!watershedCheckbox || !watershedCheckbox.checked) {
             return;
         }
 
@@ -2218,14 +2220,19 @@ function new_archived_incident_cluster_layer() {
             buildPOIMap();
         });
 
-        document.querySelector(".water").addEventListener('click', function () {
-            buildWaterPollutionMap();
-        });
+        var waterCheckbox = document.querySelector(".water");
+        if (waterCheckbox) {
+            waterCheckbox.addEventListener('click', function () {
+                buildWaterPollutionMap();
+            });
+        }
 
-
-        document.querySelector(".watershed").addEventListener('click', function () {
-            buildWatershedShapefile();
-        });
+        var watershedCheckbox = document.querySelector(".watershed");
+        if (watershedCheckbox) {
+            watershedCheckbox.addEventListener('click', function () {
+                buildWatershedShapefile();
+            });
+        }
 
         
         document.querySelector(".choropleth_incident").addEventListener('click', function () {

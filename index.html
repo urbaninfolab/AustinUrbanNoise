@@ -314,7 +314,7 @@ Check My Location button code leaflet
 				<!-- <div class="status-toggle"> </div> -->
 	
 				<div id="filter-menu" class="dropdown-check-list" tabindex="100">
-					<span class="anchor">᠎⠀ ⠀᠎⠀ ⠀</span>
+					<span class="anchor">&#12288;&#12288;</span>
 					
 					<ul class="items">
 						<b><li style="display: none;">Fire Data</li></b>
@@ -348,8 +348,8 @@ Check My Location button code leaflet
 						<li><input style="margin-left: 15px;" type="checkbox" class="choropleth_incident"  checked />  Noise </li>
 						<b><li>Points of Interest</li></b>
 						<li><input style="margin-left: 15px;" type="checkbox" class="firedept"  />  Construction </li>
-						<li><input style="margin-left: 15px;" type="checkbox" class="water"  />  Water </li>
-						<li><input style="margin-left: 15px;" type="checkbox" class="watershed"  />  Watershed </li>
+						<li style="display: none;"><input style="margin-left: 15px;" type="checkbox" class="water"  />  Water </li>
+						<li style="display: none;"><input style="margin-left: 15px;" type="checkbox" class="watershed"  />  Watershed </li>
 						<b><li>Traffic Flow</li></b>
 						<li><input style="margin-left: 15px;" type="checkbox" class="traffic_condition"  />  Traffic Condition</li>
 
@@ -357,10 +357,10 @@ Check My Location button code leaflet
 					</ul>
 				</div>
 
-				<div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
+				<!-- <div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
 					<a onclick="stats()" href="#">
 					<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="25px" height="25px"  xml:space="preserve"> </img>
-				</a>
+				</a> -->
 
 				</div>
 	
@@ -380,7 +380,7 @@ Check My Location button code leaflet
 				<!-- <div id="filter-menu2" class="dropdown-check-list2" tabindex="100" style="position:relative; margin-top: 17px; margin-left: 15px;">
 					<a href="https://smartcity.tacc.utexas.edu/FireIncident/3D" style="text-decoration:none;">
 						<h3 style="position:relative; top: -20px; color:white"><b>3D</b></h3>
-					<!--<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="25px" height="25px"  xml:space="preserve"> </img>-->
+					<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="25px" height="25px"  xml:space="preserve"> </img>
 				</a> -->
 
 			</div>
@@ -733,16 +733,6 @@ t>
 					<div style="color: #fefefe; text-align: left;">
 						<strong style="color: #fefefe; display: block; margin-bottom: 5px; text-align: left;">Layer Control:</strong>
 						<span style="text-align: left;">Click the layer icon to open the data filter menu. Select different data layers including Noise, Points of Interest (Construction, Water, Watershed), and Traffic Flow.</span>
-					</div>
-				</div>
-				
-				<div style="margin-bottom: 18px; display: flex; align-items: flex-start;">
-					<div style="flex-shrink: 0; margin-right: 12px;">
-						<img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats.png" width="30px" height="30px" style="display: block;">
-					</div>
-					<div style="color: #fefefe; text-align: left;">
-						<strong style="color: #fefefe; display: block; margin-bottom: 5px; text-align: left;">Statistics:</strong>
-						<span style="text-align: left;">Click the stats icon to view detailed statistics and analytics about the noise data displayed on the map.</span>
 					</div>
 				</div>
 				
