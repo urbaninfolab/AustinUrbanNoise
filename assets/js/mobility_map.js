@@ -589,7 +589,7 @@ function new_archived_incident_cluster_layer() {
     }
 
     function getToday() {
-        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Today";
+        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Today";
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
                                 // clear all markers and rebuild map layer
@@ -609,7 +609,7 @@ function new_archived_incident_cluster_layer() {
     }
 
     function getYesterday() {
-        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Yesterday";
+        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Yesterday";
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
                         // clear all markers and rebuild map layer
@@ -629,7 +629,7 @@ function new_archived_incident_cluster_layer() {
 
 
     function get3Days() {
-        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Last 3 Days";
+        document.getElementById("CurrentSelectedDate").textContent = "⠀ ⠀᠎⠀ ⠀Last 3 Days";
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
                         // clear all markers and rebuild map layer
@@ -650,7 +650,7 @@ function new_archived_incident_cluster_layer() {
     }
 
     function getCustom() {
-        document.getElementById("CurrentSelectedDate").textContent = "&#12288;&#12288;Custom";
+        document.getElementById("CurrentSelectedDate").innerHTML = "⠀ ⠀᠎⠀ ⠀Custom";;
 
         var datePicker = document.querySelector('.date-picker');
         datePicker.style.display = 'none';
@@ -1711,11 +1711,11 @@ function new_archived_incident_cluster_layer() {
     }
 
     function buildPOIMap() {
-
         // Delete all markers
         for (var i = 0; i < poiMarkers.length; i++) {
             poiMarkers[i].remove();
         }
+        poiMarkers = []; // 清空数组
 
         var fireDept = document.querySelector(".firedept").checked;
 
@@ -1723,25 +1723,30 @@ function new_archived_incident_cluster_layer() {
             return;
         }
 
-
         var mechanical_permits = [];
 
         let scale = 1.278
         // https://data.austintexas.gov/resource/3syk-w9eu.json
 
-        fetch('https://data.austintexas.gov/resource/3syk-w9eu.json')
+        // 尝试使用API查询参数直接筛选MP类型和Active状态的记录
+        // Socrata API支持$where查询参数
+        var apiUrl = 'https://data.austintexas.gov/resource/3syk-w9eu.json?$where=permittype=\'MP\' AND status_current=\'Active\'&$limit=5000';
+        fetch(apiUrl)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
                     return response.json(); 
                 }).then(construction_json => {
-
                     for (var i = 0; i < construction_json.length; i++) {
                         permit = construction_json[i];
                         
                         // filter permits
                         if(permit.permittype == "MP" && permit.status_current == "Active") {
+                            // 检查坐标是否有效
+                            if (!permit.latitude || !permit.longitude) {
+                                continue;
+                            }
 
                             var marker = L.marker([permit.latitude, permit.longitude]).addTo(map);
                             // Change the icon to a custom icon
@@ -1756,10 +1761,45 @@ function new_archived_incident_cluster_layer() {
                             marker.bindPopup(`<b style="color:#191970; font-size:16px">Construction</b> <br> 
                             <b>Description:</b> ${permit.description} <br> ` );
                             poiMarkers.push(marker);
-
                         } 
                     }
                   
+                }).catch(error => {
+                    // 如果筛选查询失败，回退到获取全部数据
+                    return fetch('https://data.austintexas.gov/resource/3syk-w9eu.json?$limit=5000')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(construction_json => {
+                            for (var i = 0; i < construction_json.length; i++) {
+                                permit = construction_json[i];
+                                
+                                // filter permits
+                                if(permit.permittype == "MP" && permit.status_current == "Active") {
+                                    // 检查坐标是否有效
+                                    if (!permit.latitude || !permit.longitude) {
+                                        continue;
+                                    }
+
+                                    var marker = L.marker([permit.latitude, permit.longitude]).addTo(map);
+                                    marker.setIcon(L.icon({
+                                        iconUrl: "./assets/images/construction.png",
+                                        iconSize: [20 * scale, 20],
+                                        iconAnchor: [10, 10],
+                                        popupAnchor: [-5, 0]
+                                    }));
+
+                                    marker.bindPopup(`<b style="color:#191970; font-size:16px">Construction</b> <br> 
+                                    <b>Description:</b> ${permit.description} <br> ` );
+                                    poiMarkers.push(marker);
+                                } 
+                            }
+                        });
+                }).catch(error => {
+                    console.error('[buildPOIMap] 获取数据时出错:', error);
                 });
         
     }
@@ -1969,41 +2009,126 @@ function new_archived_incident_cluster_layer() {
     let current_noise_shapefile = null;
     
     function buildNoiseHeatmap() {
+        // Check if checkbox is still checked before starting async operation
+        if (!document.querySelector(".choropleth_incident").checked) {
+            return;
+        }
 
         const storage = app.storage();
         const noiseRef = storage.ref('noise_points.json');
 
         noisePoints2 = [];
 
+        // Helper function: create heatmap from JSON data
+        function createHeatmapFromData(data) {
+            // Check checkbox state before adding layer
+            if (!document.querySelector(".choropleth_incident").checked) {
+                return;
+            }
 
-        noiseRef.getDownloadURL().then((url) => {
-            const xhr = new XMLHttpRequest();
-            xhr.responseType = 'blob';
-            xhr.onload = async (event) => {
-              const blob = xhr.response;
-              data = JSON.parse(await blob.text())
-
-              for(var i = 0; i < 10000000; i++) {
+            noisePoints2 = [];
+            for(var i = 0; i < 10000000; i++) {
                 const json_object = data[String(i)];
                 if(json_object) {
                     noisePoints2.push([json_object.latitude, json_object.longitude, Math.max(30, data[String(i)].noise_level)])
                 }
+            }
             
-              }
-              var heat = L.heatLayer(
+            var heat = L.heatLayer(
                 noisePoints2
             , {radius: 5, max: 80, maxZoom: 15, blur: 1});
             
-            heat.addTo(map);
-            current_noise_shapefile = heat;
+            // Final check before adding to map
+            if (document.querySelector(".choropleth_incident").checked) {
+                heat.addTo(map);
+                current_noise_shapefile = heat;
+            }
+        }
 
+        // Try to load from Firebase Storage
+        noiseRef.getDownloadURL().then((url) => {
+            // Check again before making XHR request
+            if (!document.querySelector(".choropleth_incident").checked) {
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = 'blob';
+            xhr.onload = async (event) => {
+              // Check checkbox state again before adding layer (most important check)
+              if (!document.querySelector(".choropleth_incident").checked) {
+                  return;
+              }
+
+              const blob = xhr.response;
+              data = JSON.parse(await blob.text())
+              createHeatmapFromData(data);
+
+            };
+            xhr.onerror = function() {
+                // If Firebase URL load fails, fallback to local file
+                loadLocalNoiseData();
             };
             xhr.open('GET', url);
             xhr.send();
         
-        })
+        }).catch(error => {
+            // Fallback to local file when Firebase Storage quota exceeded or other errors
+            console.warn('[buildNoiseHeatmap] Firebase Storage failed, falling back to local file:', error.message);
+            loadLocalNoiseData();
+        });
 
-    
+        // Load data from local cleaned_noise.zip
+        function loadLocalNoiseData() {
+            // Check checkbox state
+            if (!document.querySelector(".choropleth_incident").checked) {
+                return;
+            }
+
+            // Use fetch to load zip file, then parse with JSZip
+            fetch('data/cleaned_noise.zip')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load cleaned_noise.zip');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    // Parse zip file with JSZip
+                    if (typeof JSZip !== 'undefined') {
+                        return JSZip.loadAsync(blob);
+                    } else {
+                        throw new Error('JSZip not loaded');
+                    }
+                })
+                .then(function(zip) {
+                    // Find JSON file (usually noise_points.json)
+                    var jsonFile = null;
+                    var jsonFileName = null;
+                    
+                    zip.forEach(function(relativePath, file) {
+                        // Find .json file, prefer noise_points.json
+                        if (relativePath.endsWith('.json')) {
+                            if (relativePath.includes('noise_points') || !jsonFile) {
+                                jsonFile = file;
+                                jsonFileName = relativePath;
+                            }
+                        }
+                    });
+                    
+                    if (jsonFile) {
+                        return jsonFile.async('string').then(function(jsonText) {
+                            var data = JSON.parse(jsonText);
+                            createHeatmapFromData(data);
+                        });
+                    } else {
+                        throw new Error('No JSON file found in cleaned_noise.zip');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('[buildNoiseHeatmap] Failed to load cleaned_noise.zip:', error.message);
+                });
+        }
     }
 
 
