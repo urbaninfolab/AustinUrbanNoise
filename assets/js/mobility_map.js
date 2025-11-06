@@ -1050,8 +1050,6 @@ var markers = L.markerClusterGroup({
     });
     
 
-    let inactive_flag = false;
-
     addMapLayer(map);
 
     // map today's dp
@@ -1059,7 +1057,6 @@ var markers = L.markerClusterGroup({
     var today = new Date();
     var date = today.getFullYear() + '-' + ("0" + (today.getMonth() + 1)).slice(-2) + '-' + ("0" + today.getDate()).slice(-2);
     dateArray.push(date);
-    // mapFireIncident(map, dateArray, inactive_flag);
     buildSelectBar(map);
     buildDropdownMenu(map);
 
@@ -1067,34 +1064,6 @@ var markers = L.markerClusterGroup({
 
 
     map._layersMaxZoom = 19;
-
-
-
-
-    // add zostera legend
-    L.control.legend({
-        position: 'bottomleft',
-        items: [
-            {color: 'white', label: '<b>Fire Risk</b>'},
-            {color: 'red', label: 'Highest'},
-            {color: 'orange', label: 'Elevated'},
-            {color: 'yellow', label: 'Low'},
-            {color: 'white', label: ''},
-            {color: 'white', label: '<b>Smoke Levels</b>'},
-            {color: '#9cd74e', label: 'Good'},
-            {color: '#facf39', label: 'Moderate'},
-            {color: '#f68f47', label: 'Unhealthy for Sensitive Groups'},
-            {color: '#f55e5f', label: 'Unhealthy'},
-            {color: '#a070b5', label: 'Very Unhealthy'},
-            {color: '#a06a7b', label: 'Hazardous'},
-        ],
-        collapsed: true,
-        // insert different label for the collapsed legend button.
-        buttonHtml: 'Legend'
-    }).addTo(map);
-
-    document.getElementsByClassName("leaflet-left")[1].style.left = "5px"
-    document.getElementsByClassName("leaflet-legend-list")[0].style = "text-align: left;"
 
     // add geolocator for address
     //const provider = new GeoSearch.OpenStreetMapProvider();
@@ -1159,7 +1128,7 @@ var markers = L.markerClusterGroup({
         }
     
         container.innerHTML = `
-        <div class=\"geocoder-control-input leaflet-bar\" title=\"Check My Location\" style=\"position:absolute;top:0px; background-image: url(https://smartcity.tacc.utexas.edu/FireIncident/assets/images/location.png)\"></div><div class=\"geocoder-control-suggestions leaflet-bar\"><div class=\"\"></div></div>\r\n
+        <div class=\"geocoder-control-input leaflet-bar\" title=\"Check My Location\" style=\"position:absolute;top:0px; background-image: url(assets/images/location.png)\"></div><div class=\"geocoder-control-suggestions leaflet-bar\"><div class=\"\"></div></div>\r\n
         `;
 
         return container;
@@ -1205,7 +1174,7 @@ L.Control.Watermark = L.Control.extend({
         container.innerHTML = `
         <div class=\"geocoder-control-input leaflet-bar\" title=\"Stats\" style=\"    
 
-        background-image: url(); width:35px; \"><img src="https://smartcity.tacc.utexas.edu/FireIncident/assets/images/stats1.png" style="width: 20px;height: 20px;position: absolute;left: 5px;"></div><div class=\"geocoder-control-suggestions leaflet-bar\"><div class=\"\"></div></div>\r\n
+        background-image: url(); width:35px; \"><img src="assets/images/stats1.png" style="width: 20px;height: 20px;position: absolute;left: 5px;"></div><div class=\"geocoder-control-suggestions leaflet-bar\"><div class=\"\"></div></div>\r\n
         `;
 
         return container;
