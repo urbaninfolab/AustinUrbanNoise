@@ -429,7 +429,13 @@ t>
 		<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js"></script> -->
 
 		<script src="assets/js/papaparse.min.js"></script>
-		<script src="assets/js/mobility_map.js"></script>
+		<!-- Refactored script files - load in order -->
+		<!-- 1. Common map functionality -->
+		<script src="assets/js/map_common.js"></script>
+		<!-- 2. Project-specific functionality -->
+		<script src="assets/js/noise_map.js"></script>
+		<!-- 3. Initialization script -->
+		<script src="assets/js/map_init.js"></script>
 
 
 		<!-- Google Map Layers -->
