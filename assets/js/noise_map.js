@@ -805,22 +805,6 @@ function createLocationButton(map) {
 }
 
 /**
- * Create stats button control
- */
-function createStatsButton(map) {
-    return createCustomControl({
-        title: "Stats",
-        position: 'bottomright',
-        html: `<div class="geocoder-control-input leaflet-bar" title="Stats" style="background-image: url(); width:35px;"><img src="assets/images/stats1.png" style="width: 20px;height: 20px;position: absolute;left: 5px;"></div><div class="geocoder-control-suggestions leaflet-bar"><div class=""></div></div>`,
-        onClick: function() {
-            if (typeof stats === 'function') {
-                stats();
-            }
-        }
-    });
-}
-
-/**
  * Create layers button control
  */
 function createLayersButton(map) {

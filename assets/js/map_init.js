@@ -40,9 +40,6 @@ function initMapAndFeatures() {
     var locationButton = createLocationButton(map);
     locationButton.addTo(map);
 
-    var statsButton = createStatsButton(map);
-    statsButton.addTo(map);
-
     var layersButton = createLayersButton(map);
     layersButton.addTo(map);
 
